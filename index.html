@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kennedy Kusumo</title>
+  <meta name="description" content="Kennedy Kusumo — Senior Modelling and Simulation Scientist. Mathematical optimisation, process modelling, and decision tools for complex industrial problems." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Tab nav ── */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--color-border);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--color-muted);
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.85rem 1.25rem;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: var(--color-text); }
+    .tab-btn.active {
+      color: var(--color-text);
+      border-bottom-color: var(--color-accent);
+    }
+
+    /* ── Tab panels ── */
+    .tab-panel { display: none; padding: 3rem 0; }
+    .tab-panel.active { display: block; }
+
+    /* ── Timeline ── */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 720px;
+    }
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 1.5rem;
+      padding: 1.75rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-date {
+      font-size: 0.78rem;
+      color: var(--color-muted);
+      padding-top: 0.2rem;
+      line-height: 1.5;
+    }
+    .timeline-body h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      line-height: 1.4;
+    }
+    .timeline-body .timeline-org {
+      font-size: 0.8rem;
+      color: var(--color-accent);
+      margin-bottom: 0.5rem;
+    }
+    .timeline-body p {
+      font-size: 0.875rem;
+      color: var(--color-muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+    .timeline-body .timeline-tags {
+      margin-top: 0.6rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .tag {
+      font-size: 0.7rem;
+      padding: 0.2em 0.6em;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      color: var(--color-muted);
+    }
+    .timeline-link {
+      display: inline-block;
+      margin-top: 0.75rem;
+      font-size: 0.78rem;
+      color: var(--color-accent);
+    }
+
+    /* ── Vertical Timeline (Professional History) ── */
+    .vtl {
+      position: relative;
+      max-width: 760px;
+    }
+
+    /* The spine */
+    .vtl::before {
+      content: '';
+      position: absolute;
+      left: 70px;
+      top: 16px;
+      bottom: 16px;
+      width: 1px;
+      background: var(--color-border);
+      z-index: 0;
+    }
+
+    .vtl-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+
+    .vtl-item:last-child { padding-bottom: 0; }
+
+    .vtl-node {
+      flex-shrink: 0;
+      width: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.9rem;
+    }
+
+    .vtl-date {
+      font-size: 0.65rem;
+      color: var(--color-muted);
+      font-family: var(--font-mono);
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+
+    .vtl-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-surface);
+      border: 2px solid var(--color-border);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .vtl-item:hover .vtl-dot {
+      border-color: var(--color-accent);
+      transform: scale(1.4);
+      box-shadow: 0 0 0 4px rgba(79, 142, 247, 0.18);
+    }
+
+    .vtl-card {
+      flex: 1;
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      background: var(--color-surface);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .vtl-item:hover .vtl-card {
+      transform: translateY(-4px);
+      border-color: var(--color-accent);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,142,247,0.15);
+    }
+
+    .vtl-card h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      line-height: 1.4;
+    }
+
+    .vtl-card .vtl-org {
+      font-size: 0.8rem;
+      color: var(--color-accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .vtl-card p {
+      font-size: 0.875rem;
+      color: var(--color-muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .vtl-card .vtl-duration {
+      font-size: 0.68rem;
+      color: var(--color-muted);
+      font-family: var(--font-mono);
+      margin-bottom: 0.6rem;
+    }
+
+    @media (max-width: 480px) {
+      .vtl::before { left: 0; }
+      .vtl-node { width: auto; flex-direction: column; align-items: center; gap: 0.3rem; padding-top: 1rem; }
+      .vtl-item { gap: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav>
+    <div class="container">
+      <a class="nav-brand" href="/">Kennedy Kusumo</a>
+      <ul class="nav-links">
+        <li><a href="https://www.linkedin.com/in/kennedyputrakusumo" target="_blank">LinkedIn ↗</a></li>
+        <li><a href="https://scholar.google.com/citations" target="_blank">Scholar ↗</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <header class="hero">
+    <div class="container">
+      <p class="hero-eyebrow">Senior Scientist · AstraZeneca · London</p>
+      <!-- Headline placeholder — to be finalised after all material is shared -->
+      <h1>I build models that help<br>engineers make better decisions.</h1>
+      <p class="hero-bio">
+        Chemical engineer by training. I specialise in mathematical optimisation
+        and process modelling — turning messy real-world problems into tools
+        that actually get used. This site is the extended cut of my CV:
+        the work that doesn't fit in a bullet point.
+      </p>
+    </div>
+  </header>
+
+  <!-- ── Tabs ── -->
+  <section class="section" style="padding-top:0; border-top: none;">
+    <div class="container">
+
+      <div class="tab-nav" role="tablist">
+        <button class="tab-btn active" role="tab" data-tab="projects">Projects</button>
+        <button class="tab-btn" role="tab" data-tab="blogs">Technical Blogs</button>
+        <button class="tab-btn" role="tab" data-tab="professional">Professional History</button>
+        <button class="tab-btn" role="tab" data-tab="education">Education</button>
+        <button class="tab-btn" role="tab" data-tab="personal">Personal</button>
+        <button class="tab-btn" role="tab" data-tab="nontechblogs">Non-technical Blogs</button>
+      </div>
+
+      <!-- ── Projects ── -->
+      <div id="tab-projects" class="tab-panel active" role="tabpanel">
+        <div class="card-grid">
+
+          <a href="articles/msc-thesis-syngenta.html" style="text-decoration:none; color:inherit;">
+            <article class="card">
+              <p class="card-tag">MSc Thesis · Optimisation · AIMMS</p>
+              <h3>Optimising Harvest Schedules for Syngenta</h3>
+              <p>
+                A two-stage MILP to help Plant Managers schedule hybrid corn seed
+                harvests across hundreds of fields. Cut worst-case deviation from
+                17 days to 6 days off-optimal.
+              </p>
+              <div class="card-meta">
+                <span>Imperial College London · 2017</span>
+              </div>
+            </article>
+          </a>
+
+          <article class="card card-soon">
+            <p class="card-tag">PhD · Experiment Design · Python</p>
+            <h3>Pydex: Optimal Experiment Design for Pharmaceutical Manufacturing</h3>
+            <p>
+              Algorithms and a Python package for computing model-based experiments
+              that are optimal to multiple objectives simultaneously.
+            </p>
+            <div class="card-meta">
+              <span>Imperial College London · 2018–2022</span>
+            </div>
+          </article>
+
+          <article class="card card-soon">
+            <p class="card-tag">Internship · Process Modelling · Pharma</p>
+            <h3>Stochastic Reactor Model for Mounjaro Synthesis at Eli Lilly</h3>
+            <p>
+              Built a stochastic dynamic model of the liquid-phase synthesis reactor
+              used in the production of Mounjaro, and used it to guide experimental campaigns.
+            </p>
+            <div class="card-meta">
+              <span>Eli Lilly and Company · 2020</span>
+            </div>
+          </article>
+
+          <article class="card card-soon">
+            <p class="card-tag">Current · Pharma · Digital Tools</p>
+            <h3>End-to-End Process Modelling at AstraZeneca</h3>
+            <p>
+              Building and deploying first-principles, ML, and statistical models
+              across drug substance and product development — from Python prototypes
+              to web apps used across AZ.
+            </p>
+            <div class="card-meta">
+              <span>AstraZeneca · 2023–present</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- ── Technical Blogs ── -->
+      <div id="tab-blogs" class="tab-panel" role="tabpanel">
+        <div class="card-grid">
+
+          <a href="articles/msc-thesis-syngenta.html" style="text-decoration:none; color:inherit;">
+            <article class="card">
+              <p class="card-tag">Operations Research · MILP · Agriculture</p>
+              <h3>Optimising Harvest Schedules for Syngenta Using AIMMS</h3>
+              <p>
+                A technical deep-dive into the two-stage mixed-integer model — problem
+                formulation, constraint structure, and results from five case studies.
+              </p>
+              <div class="card-meta">
+                <span>~10 min read</span>
+                <span>2017</span>
+              </div>
+            </article>
+          </a>
+
+          <article class="card card-soon">
+            <p class="card-tag">Optimal Experiment Design · Bayesian</p>
+            <h3>How to Design Experiments That Tell You the Most</h3>
+            <p>Coming soon</p>
+          </article>
+
+          <article class="card card-soon">
+            <p class="card-tag">Process Modelling · Pharmaceutical</p>
+            <h3>First-Principles Modelling in Drug Development</h3>
+            <p>Coming soon</p>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- ── Professional History ── -->
+      <div id="tab-professional" class="tab-panel" role="tabpanel">
+        <div class="vtl">
+
+          <div class="vtl-item">
+            <div class="vtl-node">
+              <span class="vtl-date">Jun<br>2023</span>
+              <div class="vtl-dot"></div>
+            </div>
+            <div class="vtl-card">
+              <p class="vtl-duration">Jun 2023 – Present</p>
+              <h3>Senior Modelling and Simulation Scientist</h3>
+              <p class="vtl-org">AstraZeneca · London, UK</p>
+              <p>
+                Building mathematical models of pharmaceutical manufacturing processes
+                across small molecule drug substance and drug product development.
+                Developing and deploying web apps to democratise modelling capabilities
+                across AZ's Digital Science team.
+              </p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
+                <span class="tag">Process Modelling</span>
+                <span class="tag">Python</span>
+                <span class="tag">ML</span>
+                <span class="tag">Web Apps</span>
+                <span class="tag">CMC</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="vtl-item">
+            <div class="vtl-node">
+              <span class="vtl-date">Jan<br>2022</span>
+              <div class="vtl-dot"></div>
+            </div>
+            <div class="vtl-card">
+              <p class="vtl-duration">Jan 2022 – May 2023</p>
+              <h3>Research Associate</h3>
+              <p class="vtl-org">Imperial College London · London, UK</p>
+              <p>
+                PharmaSEL-Prosperity Partnership. Developed multi-objective optimal
+                experiment design algorithms and Python packages in collaboration with
+                Eli Lilly and Company.
+              </p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
+                <span class="tag">OED</span>
+                <span class="tag">Optimisation</span>
+                <span class="tag">Python</span>
+                <span class="tag">Pharma</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="vtl-item">
+            <div class="vtl-node">
+              <span class="vtl-date">Mar<br>2022</span>
+              <div class="vtl-dot"></div>
+            </div>
+            <div class="vtl-card">
+              <p class="vtl-duration">Mar 2022 – Jan 2023 · Part-time</p>
+              <h3>Research Associate</h3>
+              <p class="vtl-org">University of Sheffield · Remote</p>
+              <p>
+                Wellcome Leap R3 project. Developed mathematical models of mRNA
+                vaccine production and recommended optimal experimental campaigns
+                for pandemic-response manufacturing.
+              </p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
+                <span class="tag">mRNA</span>
+                <span class="tag">Process Modelling</span>
+                <span class="tag">Vaccine Manufacturing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="vtl-item">
+            <div class="vtl-node">
+              <span class="vtl-date">Jan<br>2020</span>
+              <div class="vtl-dot"></div>
+            </div>
+            <div class="vtl-card">
+              <p class="vtl-duration">Jan 2020 – Aug 2020</p>
+              <h3>Process Engineering Intern</h3>
+              <p class="vtl-org">Eli Lilly and Company · Indianapolis, USA</p>
+              <p>
+                Built a stochastic dynamic model of the liquid-phase synthesis reactor
+                used in production of Mounjaro. Planned optimal experimental campaigns
+                alongside Eli Lilly engineers.
+              </p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
+                <span class="tag">Dynamic Modelling</span>
+                <span class="tag">Stochastic</span>
+                <span class="tag">OED</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="vtl-item">
+            <div class="vtl-node">
+              <span class="vtl-date">Jan<br>2018</span>
+              <div class="vtl-dot"></div>
+            </div>
+            <div class="vtl-card">
+              <p class="vtl-duration">Jan 2018 – Jan 2022</p>
+              <h3>PhD Researcher / Academic Tutor / Assistant Lecturer</h3>
+              <p class="vtl-org">Imperial College London · London, UK</p>
+              <p>
+                Developed Pydex (single-objective OED) and DEUS (feasibility analysis
+                via nested sampling). Lectured on mathematical optimisation and AIMMS
+                for the MSc Sustainable Energy Futures programme. Tutored undergraduates
+                in process analysis, separations, and reactor design.
+              </p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
+                <span class="tag">PhD</span>
+                <span class="tag">Pydex</span>
+                <span class="tag">DEUS</span>
+                <span class="tag">Teaching</span>
+                <span class="tag">AIMMS</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="vtl-item">
+            <div class="vtl-node">
+              <span class="vtl-date">Jun<br>2016</span>
+              <div class="vtl-dot"></div>
+            </div>
+            <div class="vtl-card">
+              <p class="vtl-duration">Jun 2016 – Jul 2016</p>
+              <h3>Research and Development Intern</h3>
+              <p class="vtl-org">Shamood Daily Use Products · Ningbo, China</p>
+              <p>
+                Quality assurance testing for air freshener products. Reduced overall
+                testing time by ~10% through more efficient test protocols.
+              </p>
+            </div>
+          </div>
+
+          <div class="vtl-item">
+            <div class="vtl-node">
+              <span class="vtl-date">Jun<br>2015</span>
+              <div class="vtl-dot"></div>
+            </div>
+            <div class="vtl-card">
+              <p class="vtl-duration">Jun 2015 – Aug 2015</p>
+              <h3>Undergraduate Research Assistant</h3>
+              <p class="vtl-org">University of Nottingham Ningbo China</p>
+              <p>
+                Investigated photocatalytic activity of a rhenium-based organometallic
+                catalyst for CO₂ capture under supervision of Dr. Peter Summers.
+                Results published in <em>Polyhedron</em>.
+              </p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
+                <span class="tag">Spectroscopy</span>
+                <span class="tag">Catalysis</span>
+                <span class="tag">Published</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Education ── -->
+      <div id="tab-education" class="tab-panel" role="tabpanel">
+        <div class="timeline">
+
+          <div class="timeline-item">
+            <div class="timeline-date">2018–2022</div>
+            <div class="timeline-body">
+              <h3>Doctor of Philosophy — Chemical Engineering</h3>
+              <p class="timeline-org">Imperial College London</p>
+              <p>
+                Thesis: <em>Algorithms and Tools for Feasibility Analysis and Optimal
+                Experiment Design in Pharmaceutical Manufacturing.</em><br>
+                Supervisors: Prof. Nilay Shah · Prof. Benoît Chachuat ·
+                Prof. Salvador García-Muñoz (Eli Lilly)
+              </p>
+              <div class="timeline-tags">
+                <span class="tag">MILP</span>
+                <span class="tag">Bayesian Inference</span>
+                <span class="tag">Pydex</span>
+                <span class="tag">DEUS</span>
+                <span class="tag">7 Publications</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-date">2016–2017</div>
+            <div class="timeline-body">
+              <h3>MSc — Advanced Chemical Engineering with Process Systems Engineering</h3>
+              <p class="timeline-org">Imperial College London · First Class with Distinction</p>
+              <p>
+                Thesis: Harvest schedule optimisation for Syngenta using AIMMS — a
+                two-stage MILP that cut worst-case planning deviation from 17 days to
+                6 days off-optimal.
+              </p>
+              <div class="timeline-tags">
+                <span class="tag">Distinction</span>
+                <span class="tag">AIMMS</span>
+                <span class="tag">MILP</span>
+                <span class="tag">Syngenta</span>
+              </div>
+              <a class="timeline-link" href="articles/msc-thesis-syngenta.html">Read the write-up →</a>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-date">2013–2016</div>
+            <div class="timeline-body">
+              <h3>BEng with Honours — Chemical Engineering</h3>
+              <p class="timeline-org">University of Nottingham Ningbo China · 1st Class</p>
+              <p>
+                Best Overall Grade in Class. Awarded President's Scholarship (top 1%),
+                Best Student of the Year, and Hangseng Bank Scholarship across two
+                consecutive years.
+              </p>
+              <div class="timeline-tags">
+                <span class="tag">1st Class</span>
+                <span class="tag">President's Scholarship ×2</span>
+                <span class="tag">Best Student ×2</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-date">2007–2013</div>
+            <div class="timeline-body">
+              <h3>High School</h3>
+              <p class="timeline-org">Tunas Bangsa School</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Personal ── -->
+      <div id="tab-personal" class="tab-panel" role="tabpanel">
+        <p style="color:var(--color-muted); font-size:0.9rem; max-width:48ch;">
+          This section is a placeholder — share what you'd like people to know
+          about you outside of work and I'll write it up.
+        </p>
+      </div>
+
+      <!-- ── Non-technical Blogs ── -->
+      <div id="tab-nontechblogs" class="tab-panel" role="tabpanel">
+        <div class="card-grid">
+          <article class="card card-soon">
+            <p class="card-tag">Non-technical</p>
+            <h3>Placeholder — coming soon</h3>
+            <p>Share topics or drafts and I'll build this out.</p>
+          </article>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="container">
+      <span>Kennedy Kusumo</span>
+      <span>Built with plain HTML · Hosted on GitHub Pages</span>
+    </div>
+  </footer>
+
+  <script>
+    const btns = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btns.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Optimising Harvest Schedules for Syngenta — Kennedy Kusumo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+
+  <!-- ── Nav ── -->
+  <nav>
+    <div class="container">
+      <a class="nav-brand" href="../index.html">Kennedy Kusumo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#writing">← All writing</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="prose-wrap">
+
+    <!-- ── Article header ── -->
+    <header class="prose-header">
+      <p class="prose-tag">MSc Thesis · Operations Research</p>
+      <h1>Optimising Harvest Schedules for Syngenta Using AIMMS</h1>
+      <div class="prose-meta">
+        <span>Kennedy Kusumo</span>
+        <span>Imperial College London · 2017</span>
+        <span>~10 min read</span>
+      </div>
+    </header>
+
+    <!-- ── Abstract callout ── -->
+    <div class="callout">
+      <p class="callout-label">Abstract</p>
+      <p>
+        [One paragraph summary: the problem, the approach, the key result.
+        Write this last — it should stand alone as a complete picture.]
+      </p>
+    </div>
+
+    <article class="prose">
+
+      <h2>1. The Problem</h2>
+      <p>
+        [Describe the business context at Syngenta. What does a Plant Manager
+        actually do? What makes harvest scheduling hard — weather windows,
+        machine capacity, crop maturity, processing facility constraints?
+        Write for a technically literate reader who doesn't know the agri-seed industry.]
+      </p>
+
+      <h2>2. Why This Is Hard to Solve Manually</h2>
+      <p>
+        [Combinatorial complexity. How many fields, machines, time windows?
+        What happens when a Plant Manager gets it wrong — idle machines, crop
+        loss, missed processing windows? This section motivates the need for
+        a systematic approach.]
+      </p>
+
+      <h2>3. Modelling Approach</h2>
+      <p>
+        [Introduce the optimisation framework. What type of model — MILP?
+        What is the objective function? What are the key decision variables
+        (e.g. which machine harvests which field on which day)?]
+      </p>
+
+      <h3>3.1 Decision Variables</h3>
+      <p>[Describe the key variables and what they represent.]</p>
+
+      <h3>3.2 Objective Function</h3>
+      <p>[What are you minimising or maximising, and why?]</p>
+
+      <h3>3.3 Key Constraints</h3>
+      <ul>
+        <li>[Constraint 1 — e.g. harvest window for each crop variety]</li>
+        <li>[Constraint 2 — e.g. machine availability / maintenance windows]</li>
+        <li>[Constraint 3 — e.g. processing facility throughput limits]</li>
+        <li>[Add more as needed]</li>
+      </ul>
+
+      <h2>4. Building It in AIMMS</h2>
+      <p>
+        [Describe the AIMMS implementation. Why AIMMS over a general-purpose
+        solver or Python? What does the tool look like — is there a GUI for
+        plant managers? How does data flow in and out?]
+      </p>
+
+      <h2>5. Results</h2>
+      <p>
+        [What did the model produce? Quantify where possible — schedule quality,
+        reduction in idle time, improvement over a baseline or manual schedule.
+        If you ran experiments or sensitivity analyses, summarise the findings here.]
+      </p>
+
+      <div class="callout">
+        <p class="callout-label">Key finding</p>
+        <p>[One punchy sentence with your headline result.]</p>
+      </div>
+
+      <h2>6. Limitations &amp; Future Work</h2>
+      <p>
+        [Be honest about what the model doesn't capture — stochastic weather,
+        model assumptions, data quality, adoption barriers. What would you do
+        differently or extend with more time?]
+      </p>
+
+      <h2>7. Reflections</h2>
+      <p>
+        [What did you learn — technically and otherwise? What surprised you?
+        This is what makes a thesis write-up worth reading beyond the results.]
+      </p>
+
+    </article>
+
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="container">
+      <a href="../index.html">Kennedy Kusumo</a>
+      <span>Built with plain HTML · Hosted on GitHub Pages</span>
+    </div>
+  </footer>
+
+</body>
+</html>
