@@ -179,182 +179,114 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,142,247,0.15);
     }
 
-    .vtl-card h3 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 0.3rem;
-      line-height: 1.4;
-    }
+    /* ── Swimlane timeline (Professional History) ── */
 
-    .vtl-card .vtl-org {
-      font-size: 0.8rem;
-      color: var(--color-accent);
+    /* Lane header row above the swimlane */
+    .sl-headers {
+      display: flex;
+      max-width: 900px;
       margin-bottom: 0.5rem;
+      align-items: baseline;
     }
-
-    .vtl-card p {
-      font-size: 0.875rem;
-      color: var(--color-muted);
-      line-height: 1.65;
-      margin: 0;
-    }
-
-    .vtl-card .vtl-duration {
-      font-size: 0.68rem;
-      color: var(--color-muted);
+    .sl-h-axis { width: 65px; flex-shrink: 0; }
+    .sl-h-lane {
+      flex: 1;
+      font-size: 0.6rem;
       font-family: var(--font-mono);
-      margin-bottom: 0.6rem;
+      color: var(--color-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0 5px;
     }
 
-    @media (max-width: 480px) {
-      .vtl::before { left: 0; }
-      .vtl-node { width: auto; flex-direction: column; align-items: center; gap: 0.3rem; padding-top: 1rem; }
-      .vtl-item { gap: 0.75rem; }
-    }
-
-    /* ── Centre-spine alternating timeline (Professional History) ── */
-    .vtl2 {
+    /* Swimlane container — time flows top (newest) → bottom (oldest)
+       Scale: 12 px per month, origin Jun 2015, present Apr 2026 (130 mo) */
+    .swimlane {
       position: relative;
       max-width: 900px;
+      height: 1680px;
     }
 
-    /* Centre spine — runs full height of the block */
-    .vtl2::before {
+    /* Year grid lines */
+    .sl-yr {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 0;
+      pointer-events: none;
+    }
+    .sl-yr::after {
       content: '';
       position: absolute;
-      left: 50%;
+      left: 60px;
+      right: 0;
       top: 0;
-      bottom: 0;
-      width: 1px;
-      transform: translateX(-50%);
+      height: 1px;
       background: var(--color-border);
-      z-index: 0;
     }
-
-    /*
-      Grid per item: [card-zone 1fr | bracket 60px | card-zone 1fr]
-      LEFT items:  card in col-1, bracket in col-2, spacer in col-3
-      RIGHT items: spacer in col-1, bracket in col-2, card in col-3
-    */
-    .vtl2-item {
-      display: grid;
-      grid-template-columns: 1fr 60px 1fr;
-      margin-bottom: 2rem;
-      align-items: start;
-    }
-    .vtl2-item:last-child { margin-bottom: 0; }
-
-    /* ── Bracket column ── */
-    .vtl2-bracket {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Date label — fixed 16 px height so we can calculate arm offset precisely */
-    .vtl2-label {
-      font-size: 0.58rem;
+    .sl-yr-lbl {
+      position: absolute;
+      right: calc(100% - 56px);
+      top: 0;
+      transform: translateY(-50%);
+      font-size: 0.62rem;
       color: var(--color-muted);
       font-family: var(--font-mono);
-      line-height: 1;
-      text-align: center;
-      height: 16px;
-      display: flex;
-      align-items: center;
       white-space: nowrap;
     }
+    /* Present line — accent colour */
+    .sl-present::after { background: var(--color-accent); opacity: 0.4; }
+    .sl-present .sl-yr-lbl { color: var(--color-accent); }
 
-    /* Dots — 14 px diameter */
-    .vtl2-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      position: relative;
-      z-index: 2;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    /* Top dot (end / present) — accent if ongoing, muted-filled if past */
-    .vtl2-dot--top-active { background: var(--color-accent); border: 2px solid var(--color-accent); }
-    .vtl2-dot--top-past   { background: var(--color-muted);  border: 2px solid var(--color-muted); }
-
-    /* Bottom dot (start) — always hollow */
-    .vtl2-dot--btm { background: var(--color-surface); border: 2px solid var(--color-muted); }
-
-    /* Duration bar — 3 px wide, visible muted colour */
-    .vtl2-bar {
-      width: 3px;
-      background: var(--color-muted);
-      border-radius: 2px;
-      opacity: 0.45;
-      /* height set inline, linearly scaled by duration */
-    }
-
-    /* ── Card zone ── */
-    .vtl2-card-zone {
-      /*
-        padding-top = label(16px) + dot-radius(7px) = 23px
-        This pushes the card's top border to the same height as the top dot centre,
-        so the arm (card::before) aligns perfectly.
-      */
-      padding-top: 23px;
-    }
-
-    /* ── Card ── */
-    .vtl2-card {
-      position: relative;          /* needed for ::before arm */
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 1.1rem 1.35rem;
-      background: var(--color-surface);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    }
-
-    /*
-      ARM — a ::before on the card extending 30px toward the bracket.
-      30px = half of bracket column (60px/2), so arm tip lands exactly on dot centre.
-
-      RIGHT items: card is right of bracket → arm extends LEFT  (right: 100%)
-      LEFT  items: card is left  of bracket → arm extends RIGHT (left:  100%)
-    */
-    .vtl2-right .vtl2-card::before,
-    .vtl2-left  .vtl2-card::before {
-      content: '';
+    /* Cards — absolutely positioned */
+    .sl-card {
       position: absolute;
-      top: -1px;          /* align with card top border = top dot centre */
-      width: 30px;
-      height: 1px;
-      background: var(--color-muted);
-      opacity: 0.6;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      background: var(--color-surface);
+      box-sizing: border-box;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
-    .vtl2-right .vtl2-card::before { right: 100%; }
-    .vtl2-left  .vtl2-card::before { left:  100%; }
-
-    /* Hover */
-    .vtl2-item:hover .vtl2-dot {
-      transform: scale(1.35);
-      box-shadow: 0 0 0 4px rgba(79, 142, 247, 0.18);
-    }
-    .vtl2-item:hover .vtl2-card {
-      transform: translateY(-4px);
+    .sl-card:hover {
       border-color: var(--color-accent);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,142,247,0.15);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,142,247,0.15);
+      transform: scale(1.015);
+      z-index: 10;
+      overflow: visible;
     }
+    /* Lane 1 — left half */
+    .sl-l1 { left: 65px; right: calc(50% + 5px); }
+    /* Lane 2 — right half */
+    .sl-l2 { left: calc(50% + 5px); right: 0; }
 
-    /* Card content */
-    .vtl2-card h3 { font-size: 0.92rem; font-weight: 600; margin-bottom: 0.25rem; line-height: 1.35; }
-    .vtl2-card .vtl2-org { font-size: 0.78rem; color: var(--color-accent); margin-bottom: 0.45rem; }
-    .vtl2-card p { font-size: 0.855rem; color: var(--color-muted); line-height: 1.65; margin: 0; }
+    /* Card typography */
+    .sl-dates {
+      display: block;
+      font-size: 0.6rem;
+      font-family: var(--font-mono);
+      color: var(--color-muted);
+      margin-bottom: 0.3rem;
+      opacity: 0.75;
+    }
+    .sl-card h3    { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.2rem; line-height: 1.3; }
+    .sl-card .sl-org { font-size: 0.75rem; color: var(--color-accent); margin-bottom: 0.35rem; }
+    .sl-card p     { font-size: 0.835rem; color: var(--color-muted); line-height: 1.6; margin: 0; }
 
-    /* Mobile: collapse to single right column */
+    /* Compact cards — smaller padding, body hidden */
+    .sl-compact              { padding: 0.6rem 0.85rem; }
+    .sl-compact h3           { font-size: 0.82rem; }
+    .sl-compact .sl-body     { display: none; }
+
+    /* Mobile — stack vertically, natural height */
     @media (max-width: 600px) {
-      .vtl2::before { left: 30px; transform: none; }
-      .vtl2-item { grid-template-columns: 60px 1fr; }
-      .vtl2-item.vtl2-left { direction: rtl; }
-      .vtl2-item.vtl2-left > * { direction: ltr; }
+      .swimlane       { height: auto; display: flex; flex-direction: column; gap: 0; }
+      .sl-card        { position: static; width: 100%; height: auto !important; margin-bottom: 0.75rem; }
+      .sl-l1, .sl-l2  { left: 0; right: 0; }
+      .sl-yr          { display: none; }
+      .sl-headers     { display: none; }
+      .sl-compact .sl-body { display: block; }
     }
   </style>
 </head>
@@ -494,177 +426,135 @@
 
       <!-- ── Professional History ── -->
       <div id="tab-professional" class="tab-panel" role="tabpanel">
-        <div class="vtl2">
 
-          <!--
-            Side assignment (overlap-aware, full-time = left preference):
-              AZ         → LEFT   (full-time, no overlap)
-              ICL RA     → LEFT   (full-time, overlaps Sheffield → Sheffield goes RIGHT)
-              Sheffield  → RIGHT  (part-time, overlaps ICL RA)
-              Eli Lilly  → RIGHT  (intern, overlaps PhD → PhD goes LEFT)
-              PhD        → LEFT   (primary, overlaps Eli Lilly)
-              Shamood    → RIGHT  (intern)
-              UNNC       → LEFT
+        <!--
+          Swimlane: time-proportional, 12 px / month.
+          Origin: Jun 2015 (month 0).  Present: Apr 2026 (month 130).
+          card top    = (130 − end_month) × 12 + 4
+          card height = max(80, duration_months × 12) − 4
 
-            Bracket order: TOP = end/present (most recent on newest-first timeline)
-                           BOTTOM = start (oldest)
+          Lane 1 (left)  — primary / full-time:  AZ, ICL RA, PhD, UNNC
+          Lane 2 (right) — concurrent / intern:   Sheffield, Eli Lilly, Shamood
+        -->
 
-            Bar heights: linear min=24px (1 mo), max=192px (48+ mo)
-              AZ 34mo=142px  ICL RA 16mo=78px  Sheffield 10mo=56px
-              Eli Lilly 7mo=45px  PhD 48mo=192px  Shamood 1mo=24px  UNNC 2mo=28px
+        <!-- Lane headers -->
+        <div class="sl-headers" aria-hidden="true">
+          <div class="sl-h-axis"></div>
+          <div class="sl-h-lane">Primary</div>
+          <div class="sl-h-lane">Concurrent &amp; Internships</div>
+        </div>
 
-            Arm: card::before extends 30px (= half bracket width) toward spine.
-          -->
+        <div class="swimlane">
 
-          <!-- AstraZeneca — LEFT — 34 mo → 142px -->
-          <div class="vtl2-item vtl2-left">
-            <div class="vtl2-card-zone">
-              <div class="vtl2-card">
-                <h3>Senior Modelling &amp; Simulation Scientist</h3>
-                <p class="vtl2-org">AstraZeneca · London, UK</p>
-                <p>Building mathematical models of pharmaceutical manufacturing processes across small molecule drug substance and drug product development. Developing and deploying web apps to democratise modelling capabilities across AZ's Digital Science team.</p>
-                <div class="timeline-tags" style="margin-top:0.6rem;">
-                  <span class="tag">Process Modelling</span><span class="tag">Python</span><span class="tag">ML</span><span class="tag">Web Apps</span><span class="tag">CMC</span>
-                </div>
-              </div>
-            </div>
-            <div class="vtl2-bracket">
-              <span class="vtl2-label">Present</span>
-              <div class="vtl2-dot vtl2-dot--top-active"></div>
-              <div class="vtl2-bar" style="height:142px;"></div>
-              <div class="vtl2-dot vtl2-dot--btm"></div>
-              <span class="vtl2-label">Jun 2023</span>
-            </div>
-            <div></div>
+          <!-- Present marker -->
+          <div class="sl-yr sl-present" style="top:0">
+            <span class="sl-yr-lbl">Present</span>
           </div>
 
-          <!-- ICL RA — LEFT — 16 mo → 78px — overlaps Sheffield (RIGHT) -->
-          <div class="vtl2-item vtl2-left">
-            <div class="vtl2-card-zone">
-              <div class="vtl2-card">
-                <h3>Research Associate</h3>
-                <p class="vtl2-org">Imperial College London · London, UK</p>
-                <p>PharmaSEL-Prosperity Partnership. Developed multi-objective optimal experiment design algorithms and Python packages in collaboration with Eli Lilly and Company.</p>
-                <div class="timeline-tags" style="margin-top:0.6rem;">
-                  <span class="tag">OED</span><span class="tag">Optimisation</span><span class="tag">Python</span><span class="tag">Pharma</span>
-                </div>
-              </div>
-            </div>
-            <div class="vtl2-bracket">
-              <span class="vtl2-label">May 2023</span>
-              <div class="vtl2-dot vtl2-dot--top-past"></div>
-              <div class="vtl2-bar" style="height:78px;"></div>
-              <div class="vtl2-dot vtl2-dot--btm"></div>
-              <span class="vtl2-label">Jan 2022</span>
-            </div>
-            <div></div>
-          </div>
+          <!-- Year grid lines (Jan 1 of each year) -->
+          <div class="sl-yr" style="top:36px"><span class="sl-yr-lbl">2026</span></div>
+          <div class="sl-yr" style="top:180px"><span class="sl-yr-lbl">2025</span></div>
+          <div class="sl-yr" style="top:324px"><span class="sl-yr-lbl">2024</span></div>
+          <div class="sl-yr" style="top:468px"><span class="sl-yr-lbl">2023</span></div>
+          <div class="sl-yr" style="top:612px"><span class="sl-yr-lbl">2022</span></div>
+          <div class="sl-yr" style="top:756px"><span class="sl-yr-lbl">2021</span></div>
+          <div class="sl-yr" style="top:900px"><span class="sl-yr-lbl">2020</span></div>
+          <div class="sl-yr" style="top:1044px"><span class="sl-yr-lbl">2019</span></div>
+          <div class="sl-yr" style="top:1188px"><span class="sl-yr-lbl">2018</span></div>
+          <div class="sl-yr" style="top:1332px"><span class="sl-yr-lbl">2017</span></div>
+          <div class="sl-yr" style="top:1476px"><span class="sl-yr-lbl">2016</span></div>
+          <div class="sl-yr" style="top:1560px"><span class="sl-yr-lbl">2015</span></div>
 
-          <!-- Sheffield RA — RIGHT — 10 mo → 56px — overlaps ICL RA (LEFT) -->
-          <div class="vtl2-item vtl2-right">
-            <div></div>
-            <div class="vtl2-bracket">
-              <span class="vtl2-label">Jan 2023</span>
-              <div class="vtl2-dot vtl2-dot--top-past"></div>
-              <div class="vtl2-bar" style="height:56px;"></div>
-              <div class="vtl2-dot vtl2-dot--btm"></div>
-              <span class="vtl2-label">Mar 2022</span>
-            </div>
-            <div class="vtl2-card-zone">
-              <div class="vtl2-card">
-                <h3>Research Associate <span style="font-weight:400;color:var(--color-muted);">· Part-time</span></h3>
-                <p class="vtl2-org">University of Sheffield · Remote</p>
-                <p>Wellcome Leap R3 project. Developed mathematical models of mRNA vaccine production and recommended optimal experimental campaigns for pandemic-response manufacturing.</p>
-                <div class="timeline-tags" style="margin-top:0.6rem;">
-                  <span class="tag">mRNA</span><span class="tag">Process Modelling</span><span class="tag">Vaccine Manufacturing</span>
-                </div>
+          <!-- ── Lane 1: Primary ── -->
+
+          <!-- AstraZeneca: end=Apr 2026 (m130), start=Jun 2023 (m96), 34 mo → top=4, h=404 -->
+          <div class="sl-card sl-l1" style="top:4px;height:404px;">
+            <span class="sl-dates">Jun 2023 – Present</span>
+            <h3>Senior Modelling &amp; Simulation Scientist</h3>
+            <p class="sl-org">AstraZeneca · London, UK</p>
+            <div class="sl-body">
+              <p>Building mathematical models of pharmaceutical manufacturing processes across small molecule drug substance and drug product development. Developing and deploying web apps to democratise modelling capabilities across AZ's Digital Science team.</p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
+                <span class="tag">Process Modelling</span><span class="tag">Python</span><span class="tag">ML</span><span class="tag">Web Apps</span><span class="tag">CMC</span>
               </div>
             </div>
           </div>
 
-          <!-- Eli Lilly — RIGHT — 7 mo → 45px — overlaps PhD (LEFT) -->
-          <div class="vtl2-item vtl2-right">
-            <div></div>
-            <div class="vtl2-bracket">
-              <span class="vtl2-label">Aug 2020</span>
-              <div class="vtl2-dot vtl2-dot--top-past"></div>
-              <div class="vtl2-bar" style="height:45px;"></div>
-              <div class="vtl2-dot vtl2-dot--btm"></div>
-              <span class="vtl2-label">Jan 2020</span>
-            </div>
-            <div class="vtl2-card-zone">
-              <div class="vtl2-card">
-                <h3>Process Engineering Intern</h3>
-                <p class="vtl2-org">Eli Lilly and Company · Indianapolis, USA</p>
-                <p>Built a stochastic dynamic model of the liquid-phase synthesis reactor used in production of Mounjaro. Planned optimal experimental campaigns alongside Eli Lilly engineers.</p>
-                <div class="timeline-tags" style="margin-top:0.6rem;">
-                  <span class="tag">Dynamic Modelling</span><span class="tag">Stochastic</span><span class="tag">OED</span>
-                </div>
+          <!-- ICL RA: end=May 2023 (m95), start=Jan 2022 (m79), 16 mo → top=424, h=188 -->
+          <div class="sl-card sl-l1" style="top:424px;height:188px;">
+            <span class="sl-dates">Jan 2022 – May 2023</span>
+            <h3>Research Associate</h3>
+            <p class="sl-org">Imperial College London · London, UK</p>
+            <div class="sl-body">
+              <p>PharmaSEL-Prosperity Partnership. Developed multi-objective optimal experiment design algorithms and Python packages in collaboration with Eli Lilly and Company.</p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
+                <span class="tag">OED</span><span class="tag">Optimisation</span><span class="tag">Python</span><span class="tag">Pharma</span>
               </div>
             </div>
           </div>
 
-          <!-- PhD — LEFT — 48 mo → 192px — overlaps Eli Lilly (RIGHT) -->
-          <div class="vtl2-item vtl2-left">
-            <div class="vtl2-card-zone">
-              <div class="vtl2-card">
-                <h3>PhD Researcher · Academic Tutor · Assistant Lecturer</h3>
-                <p class="vtl2-org">Imperial College London · London, UK</p>
-                <p>Developed Pydex (optimal experiment design) and DEUS (feasibility analysis via nested sampling). Lectured on mathematical optimisation and AIMMS for the MSc Sustainable Energy Futures programme. Tutored undergraduates in process analysis, separations, and reactor design.</p>
-                <div class="timeline-tags" style="margin-top:0.6rem;">
-                  <span class="tag">PhD</span><span class="tag">Pydex</span><span class="tag">DEUS</span><span class="tag">Teaching</span><span class="tag">AIMMS</span>
-                </div>
-              </div>
-            </div>
-            <div class="vtl2-bracket">
-              <span class="vtl2-label">Jan 2022</span>
-              <div class="vtl2-dot vtl2-dot--top-past"></div>
-              <div class="vtl2-bar" style="height:192px;"></div>
-              <div class="vtl2-dot vtl2-dot--btm"></div>
-              <span class="vtl2-label">Jan 2018</span>
-            </div>
-            <div></div>
-          </div>
-
-          <!-- Shamood — RIGHT — 1 mo → 24px (min) -->
-          <div class="vtl2-item vtl2-right">
-            <div></div>
-            <div class="vtl2-bracket">
-              <span class="vtl2-label">Jul 2016</span>
-              <div class="vtl2-dot vtl2-dot--top-past"></div>
-              <div class="vtl2-bar" style="height:24px;"></div>
-              <div class="vtl2-dot vtl2-dot--btm"></div>
-              <span class="vtl2-label">Jun 2016</span>
-            </div>
-            <div class="vtl2-card-zone">
-              <div class="vtl2-card">
-                <h3>Research &amp; Development Intern</h3>
-                <p class="vtl2-org">Shamood Daily Use Products · Ningbo, China</p>
-                <p>Quality assurance testing for air freshener products. Reduced overall testing time by ~10% through more efficient test protocols.</p>
+          <!-- PhD: end=Jan 2022 (m79), start=Jan 2018 (m31), 48 mo → top=616, h=572 -->
+          <div class="sl-card sl-l1" style="top:616px;height:572px;">
+            <span class="sl-dates">Jan 2018 – Jan 2022</span>
+            <h3>PhD Researcher · Academic Tutor · Assistant Lecturer</h3>
+            <p class="sl-org">Imperial College London · London, UK</p>
+            <div class="sl-body">
+              <p>Developed Pydex (optimal experiment design) and DEUS (feasibility analysis via nested sampling). Lectured on mathematical optimisation and AIMMS for the MSc Sustainable Energy Futures programme. Tutored undergraduates in process analysis, separations, and reactor design.</p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
+                <span class="tag">PhD</span><span class="tag">Pydex</span><span class="tag">DEUS</span><span class="tag">Teaching</span><span class="tag">AIMMS</span>
               </div>
             </div>
           </div>
 
-          <!-- UNNC — LEFT — 2 mo → 28px -->
-          <div class="vtl2-item vtl2-left">
-            <div class="vtl2-card-zone">
-              <div class="vtl2-card">
-                <h3>Undergraduate Research Assistant</h3>
-                <p class="vtl2-org">University of Nottingham Ningbo China</p>
-                <p>Investigated photocatalytic activity of a rhenium-based organometallic catalyst for CO₂ capture under supervision of Dr. Peter Summers. Results published in <em>Polyhedron</em>.</p>
-                <div class="timeline-tags" style="margin-top:0.6rem;">
-                  <span class="tag">Spectroscopy</span><span class="tag">Catalysis</span><span class="tag">Published</span>
-                </div>
+          <!-- UNNC: end=Aug 2015 (m2), start=Jun 2015 (m0), 2 mo → top=1540, h=76 (compact) -->
+          <div class="sl-card sl-l1 sl-compact" style="top:1540px;height:76px;">
+            <span class="sl-dates">Jun – Aug 2015</span>
+            <h3>Undergraduate Research Assistant</h3>
+            <p class="sl-org">University of Nottingham Ningbo China</p>
+            <div class="sl-body">
+              <p>Photocatalytic activity of a rhenium-based organometallic catalyst for CO₂ capture. Results published in <em>Polyhedron</em>.</p>
+              <div class="timeline-tags" style="margin-top:0.5rem;">
+                <span class="tag">Spectroscopy</span><span class="tag">Catalysis</span><span class="tag">Published</span>
               </div>
             </div>
-            <div class="vtl2-bracket">
-              <span class="vtl2-label">Aug 2015</span>
-              <div class="vtl2-dot vtl2-dot--top-past"></div>
-              <div class="vtl2-bar" style="height:28px;"></div>
-              <div class="vtl2-dot vtl2-dot--btm"></div>
-              <span class="vtl2-label">Jun 2015</span>
+          </div>
+
+          <!-- ── Lane 2: Concurrent & Internships ── -->
+
+          <!-- Sheffield: end=Jan 2023 (m91), start=Mar 2022 (m81), 10 mo → top=472, h=116 -->
+          <div class="sl-card sl-l2" style="top:472px;height:116px;">
+            <span class="sl-dates">Mar 2022 – Jan 2023</span>
+            <h3>Research Associate <span style="font-weight:400;color:var(--color-muted);">· Part-time</span></h3>
+            <p class="sl-org">University of Sheffield · Remote</p>
+            <div class="sl-body">
+              <p>Wellcome Leap R3. mRNA vaccine manufacturing models and optimal experimental campaigns for pandemic-response.</p>
+              <div class="timeline-tags" style="margin-top:0.5rem;">
+                <span class="tag">mRNA</span><span class="tag">Process Modelling</span><span class="tag">Vaccine Manufacturing</span>
+              </div>
             </div>
-            <div></div>
+          </div>
+
+          <!-- Eli Lilly: end=Aug 2020 (m62), start=Jan 2020 (m55), 7 mo → top=820, h=80 (compact) -->
+          <div class="sl-card sl-l2 sl-compact" style="top:820px;height:80px;">
+            <span class="sl-dates">Jan – Aug 2020</span>
+            <h3>Process Engineering Intern</h3>
+            <p class="sl-org">Eli Lilly and Company · Indianapolis, USA</p>
+            <div class="sl-body">
+              <p>Built a stochastic dynamic model of the liquid-phase synthesis reactor used in Mounjaro production. Planned optimal experimental campaigns alongside Eli Lilly engineers.</p>
+              <div class="timeline-tags" style="margin-top:0.5rem;">
+                <span class="tag">Dynamic Modelling</span><span class="tag">Stochastic</span><span class="tag">OED</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shamood: end=Jul 2016 (m13), start=Jun 2016 (m12), 1 mo → top=1408, h=76 (compact) -->
+          <div class="sl-card sl-l2 sl-compact" style="top:1408px;height:76px;">
+            <span class="sl-dates">Jun – Jul 2016</span>
+            <h3>R&amp;D Intern</h3>
+            <p class="sl-org">Shamood Daily Use Products · Ningbo, China</p>
+            <div class="sl-body">
+              <p>Quality assurance testing for air freshener products. Reduced testing time by ~10% through efficient protocols.</p>
+            </div>
           </div>
 
         </div>
