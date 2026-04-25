@@ -218,7 +218,7 @@
       max-width: 900px;
     }
 
-    /* Centre spine */
+    /* Centre spine — runs full height of the block */
     .vtl2::before {
       content: '';
       position: absolute;
@@ -231,16 +231,20 @@
       z-index: 0;
     }
 
-    /* Each item: [side 1fr | bracket 60px | side 1fr] */
+    /*
+      Grid per item: [card-zone 1fr | bracket 60px | card-zone 1fr]
+      LEFT items:  card in col-1, bracket in col-2, spacer in col-3
+      RIGHT items: spacer in col-1, bracket in col-2, card in col-3
+    */
     .vtl2-item {
       display: grid;
       grid-template-columns: 1fr 60px 1fr;
       margin-bottom: 2rem;
-      position: relative;
+      align-items: start;
     }
     .vtl2-item:last-child { margin-bottom: 0; }
 
-    /* Bracket: the centre column — dots, bar, labels */
+    /* ── Bracket column ── */
     .vtl2-bracket {
       display: flex;
       flex-direction: column;
@@ -249,70 +253,59 @@
       z-index: 1;
     }
 
+    /* Date label — fixed 16 px height so we can calculate arm offset precisely */
     .vtl2-label {
       font-size: 0.58rem;
       color: var(--color-muted);
       font-family: var(--font-mono);
       line-height: 1;
       text-align: center;
-      height: 16px; /* fixed — used to calculate arm offset */
+      height: 16px;
       display: flex;
       align-items: center;
       white-space: nowrap;
     }
 
+    /* Dots — 14 px diameter */
     .vtl2-dot {
-      width: 11px;
-      height: 11px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       flex-shrink: 0;
       position: relative;
       z-index: 2;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .vtl2-dot--start {
-      background: var(--color-accent);
-      border: 2px solid var(--color-accent);
-    }
+    /* Top dot (end / present) — accent if ongoing, muted-filled if past */
+    .vtl2-dot--top-active { background: var(--color-accent); border: 2px solid var(--color-accent); }
+    .vtl2-dot--top-past   { background: var(--color-muted);  border: 2px solid var(--color-muted); }
 
-    .vtl2-dot--end {
-      background: var(--color-surface);
-      border: 2px solid var(--color-muted);
-    }
+    /* Bottom dot (start) — always hollow */
+    .vtl2-dot--btm { background: var(--color-surface); border: 2px solid var(--color-muted); }
 
+    /* Duration bar — 3 px wide, visible muted colour */
     .vtl2-bar {
-      width: 2px;
-      background: var(--color-border);
-      /* height set inline per item, proportional to duration */
+      width: 3px;
+      background: var(--color-muted);
+      border-radius: 2px;
+      opacity: 0.45;
+      /* height set inline, linearly scaled by duration */
     }
 
-    /* Card wrap: holds arm + card */
-    .vtl2-card-wrap {
-      display: flex;
-      align-items: flex-start;
-      /* pad top = label height (16px), aligning arm with start dot */
-      padding-top: 16px;
+    /* ── Card zone ── */
+    .vtl2-card-zone {
+      /*
+        padding-top = label(16px) + dot-radius(7px) = 23px
+        This pushes the card's top border to the same height as the top dot centre,
+        so the arm (card::before) aligns perfectly.
+      */
+      padding-top: 23px;
     }
 
-    .vtl2-right .vtl2-card-wrap { flex-direction: row; }
-    .vtl2-left  .vtl2-card-wrap { flex-direction: row-reverse; }
-
-    /* Arm: horizontal connector from bracket to card */
-    .vtl2-arm {
-      flex-shrink: 0;
-      width: 18px;
-      height: 1px;
-      background: var(--color-border);
-      /* vertically centre on start dot: dot is 11px, arm is 1px → offset 5px */
-      margin-top: 5px;
-      align-self: flex-start;
-    }
-
-    /* Card */
+    /* ── Card ── */
     .vtl2-card {
-      flex: 1;
-      min-width: 0;
+      position: relative;          /* needed for ::before arm */
       border: 1px solid var(--color-border);
       border-radius: 14px;
       padding: 1.1rem 1.35rem;
@@ -320,47 +313,48 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
 
-    .vtl2-item:hover .vtl2-dot--start {
-      transform: scale(1.4);
+    /*
+      ARM — a ::before on the card extending 30px toward the bracket.
+      30px = half of bracket column (60px/2), so arm tip lands exactly on dot centre.
+
+      RIGHT items: card is right of bracket → arm extends LEFT  (right: 100%)
+      LEFT  items: card is left  of bracket → arm extends RIGHT (left:  100%)
+    */
+    .vtl2-right .vtl2-card::before,
+    .vtl2-left  .vtl2-card::before {
+      content: '';
+      position: absolute;
+      top: -1px;          /* align with card top border = top dot centre */
+      width: 30px;
+      height: 1px;
+      background: var(--color-muted);
+      opacity: 0.6;
+    }
+    .vtl2-right .vtl2-card::before { right: 100%; }
+    .vtl2-left  .vtl2-card::before { left:  100%; }
+
+    /* Hover */
+    .vtl2-item:hover .vtl2-dot {
+      transform: scale(1.35);
       box-shadow: 0 0 0 4px rgba(79, 142, 247, 0.18);
     }
-
     .vtl2-item:hover .vtl2-card {
       transform: translateY(-4px);
       border-color: var(--color-accent);
       box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,142,247,0.15);
     }
 
-    .vtl2-card h3 {
-      font-size: 0.92rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      line-height: 1.35;
-    }
+    /* Card content */
+    .vtl2-card h3 { font-size: 0.92rem; font-weight: 600; margin-bottom: 0.25rem; line-height: 1.35; }
+    .vtl2-card .vtl2-org { font-size: 0.78rem; color: var(--color-accent); margin-bottom: 0.45rem; }
+    .vtl2-card p { font-size: 0.855rem; color: var(--color-muted); line-height: 1.65; margin: 0; }
 
-    .vtl2-card .vtl2-org {
-      font-size: 0.78rem;
-      color: var(--color-accent);
-      margin-bottom: 0.45rem;
-    }
-
-    .vtl2-card p {
-      font-size: 0.855rem;
-      color: var(--color-muted);
-      line-height: 1.65;
-      margin: 0;
-    }
-
-    /* Mobile: collapse to right-only, spine moves left */
+    /* Mobile: collapse to single right column */
     @media (max-width: 600px) {
-      .vtl2::before { left: 30px; }
-      .vtl2-item,
-      .vtl2-item.vtl2-left {
-        grid-template-columns: 60px 1fr;
-      }
-      .vtl2-item .vtl2-spacer { display: none; }
-      .vtl2-item.vtl2-left .vtl2-card-wrap { flex-direction: row; }
-      .vtl2-item.vtl2-left > *:last-child { display: none; }
+      .vtl2::before { left: 30px; transform: none; }
+      .vtl2-item { grid-template-columns: 60px 1fr; }
+      .vtl2-item.vtl2-left { direction: rtl; }
+      .vtl2-item.vtl2-left > * { direction: ltr; }
     }
   </style>
 </head>
@@ -502,18 +496,29 @@
       <div id="tab-professional" class="tab-panel" role="tabpanel">
         <div class="vtl2">
 
-          <!-- AstraZeneca — RIGHT — ~34 months → bar 136px -->
-          <div class="vtl2-item vtl2-right">
-            <div class="vtl2-spacer"></div>
-            <div class="vtl2-bracket">
-              <span class="vtl2-label">Jun 2023</span>
-              <div class="vtl2-dot vtl2-dot--start"></div>
-              <div class="vtl2-bar" style="height:136px;"></div>
-              <div class="vtl2-dot vtl2-dot--end"></div>
-              <span class="vtl2-label">Present</span>
-            </div>
-            <div class="vtl2-card-wrap">
-              <div class="vtl2-arm"></div>
+          <!--
+            Side assignment (overlap-aware, full-time = left preference):
+              AZ         → LEFT   (full-time, no overlap)
+              ICL RA     → LEFT   (full-time, overlaps Sheffield → Sheffield goes RIGHT)
+              Sheffield  → RIGHT  (part-time, overlaps ICL RA)
+              Eli Lilly  → RIGHT  (intern, overlaps PhD → PhD goes LEFT)
+              PhD        → LEFT   (primary, overlaps Eli Lilly)
+              Shamood    → RIGHT  (intern)
+              UNNC       → LEFT
+
+            Bracket order: TOP = end/present (most recent on newest-first timeline)
+                           BOTTOM = start (oldest)
+
+            Bar heights: linear min=24px (1 mo), max=192px (48+ mo)
+              AZ 34mo=142px  ICL RA 16mo=78px  Sheffield 10mo=56px
+              Eli Lilly 7mo=45px  PhD 48mo=192px  Shamood 1mo=24px  UNNC 2mo=28px
+
+            Arm: card::before extends 30px (= half bracket width) toward spine.
+          -->
+
+          <!-- AstraZeneca — LEFT — 34 mo → 142px -->
+          <div class="vtl2-item vtl2-left">
+            <div class="vtl2-card-zone">
               <div class="vtl2-card">
                 <h3>Senior Modelling &amp; Simulation Scientist</h3>
                 <p class="vtl2-org">AstraZeneca · London, UK</p>
@@ -523,12 +528,19 @@
                 </div>
               </div>
             </div>
+            <div class="vtl2-bracket">
+              <span class="vtl2-label">Present</span>
+              <div class="vtl2-dot vtl2-dot--top-active"></div>
+              <div class="vtl2-bar" style="height:142px;"></div>
+              <div class="vtl2-dot vtl2-dot--btm"></div>
+              <span class="vtl2-label">Jun 2023</span>
+            </div>
+            <div></div>
           </div>
 
-          <!-- ICL Research Associate — LEFT — ~16 months → bar 64px -->
-          <!-- Overlaps with Sheffield RA → opposite sides -->
+          <!-- ICL RA — LEFT — 16 mo → 78px — overlaps Sheffield (RIGHT) -->
           <div class="vtl2-item vtl2-left">
-            <div class="vtl2-card-wrap">
+            <div class="vtl2-card-zone">
               <div class="vtl2-card">
                 <h3>Research Associate</h3>
                 <p class="vtl2-org">Imperial College London · London, UK</p>
@@ -537,31 +549,28 @@
                   <span class="tag">OED</span><span class="tag">Optimisation</span><span class="tag">Python</span><span class="tag">Pharma</span>
                 </div>
               </div>
-              <div class="vtl2-arm"></div>
             </div>
             <div class="vtl2-bracket">
-              <span class="vtl2-label">Jan 2022</span>
-              <div class="vtl2-dot vtl2-dot--start"></div>
-              <div class="vtl2-bar" style="height:64px;"></div>
-              <div class="vtl2-dot vtl2-dot--end"></div>
               <span class="vtl2-label">May 2023</span>
+              <div class="vtl2-dot vtl2-dot--top-past"></div>
+              <div class="vtl2-bar" style="height:78px;"></div>
+              <div class="vtl2-dot vtl2-dot--btm"></div>
+              <span class="vtl2-label">Jan 2022</span>
             </div>
-            <div class="vtl2-spacer"></div>
+            <div></div>
           </div>
 
-          <!-- Sheffield RA — RIGHT — ~10 months → bar 40px -->
-          <!-- Overlaps with ICL RA → opposite sides -->
+          <!-- Sheffield RA — RIGHT — 10 mo → 56px — overlaps ICL RA (LEFT) -->
           <div class="vtl2-item vtl2-right">
-            <div class="vtl2-spacer"></div>
+            <div></div>
             <div class="vtl2-bracket">
-              <span class="vtl2-label">Mar 2022</span>
-              <div class="vtl2-dot vtl2-dot--start"></div>
-              <div class="vtl2-bar" style="height:40px;"></div>
-              <div class="vtl2-dot vtl2-dot--end"></div>
               <span class="vtl2-label">Jan 2023</span>
+              <div class="vtl2-dot vtl2-dot--top-past"></div>
+              <div class="vtl2-bar" style="height:56px;"></div>
+              <div class="vtl2-dot vtl2-dot--btm"></div>
+              <span class="vtl2-label">Mar 2022</span>
             </div>
-            <div class="vtl2-card-wrap">
-              <div class="vtl2-arm"></div>
+            <div class="vtl2-card-zone">
               <div class="vtl2-card">
                 <h3>Research Associate <span style="font-weight:400;color:var(--color-muted);">· Part-time</span></h3>
                 <p class="vtl2-org">University of Sheffield · Remote</p>
@@ -573,19 +582,17 @@
             </div>
           </div>
 
-          <!-- Eli Lilly — RIGHT — ~7 months → bar 28px -->
-          <!-- Overlaps with PhD → opposite sides -->
+          <!-- Eli Lilly — RIGHT — 7 mo → 45px — overlaps PhD (LEFT) -->
           <div class="vtl2-item vtl2-right">
-            <div class="vtl2-spacer"></div>
+            <div></div>
             <div class="vtl2-bracket">
-              <span class="vtl2-label">Jan 2020</span>
-              <div class="vtl2-dot vtl2-dot--start"></div>
-              <div class="vtl2-bar" style="height:28px;"></div>
-              <div class="vtl2-dot vtl2-dot--end"></div>
               <span class="vtl2-label">Aug 2020</span>
+              <div class="vtl2-dot vtl2-dot--top-past"></div>
+              <div class="vtl2-bar" style="height:45px;"></div>
+              <div class="vtl2-dot vtl2-dot--btm"></div>
+              <span class="vtl2-label">Jan 2020</span>
             </div>
-            <div class="vtl2-card-wrap">
-              <div class="vtl2-arm"></div>
+            <div class="vtl2-card-zone">
               <div class="vtl2-card">
                 <h3>Process Engineering Intern</h3>
                 <p class="vtl2-org">Eli Lilly and Company · Indianapolis, USA</p>
@@ -597,10 +604,9 @@
             </div>
           </div>
 
-          <!-- PhD Imperial — LEFT — ~48 months → bar 192px -->
-          <!-- Overlaps with Eli Lilly → opposite sides -->
+          <!-- PhD — LEFT — 48 mo → 192px — overlaps Eli Lilly (RIGHT) -->
           <div class="vtl2-item vtl2-left">
-            <div class="vtl2-card-wrap">
+            <div class="vtl2-card-zone">
               <div class="vtl2-card">
                 <h3>PhD Researcher · Academic Tutor · Assistant Lecturer</h3>
                 <p class="vtl2-org">Imperial College London · London, UK</p>
@@ -609,30 +615,28 @@
                   <span class="tag">PhD</span><span class="tag">Pydex</span><span class="tag">DEUS</span><span class="tag">Teaching</span><span class="tag">AIMMS</span>
                 </div>
               </div>
-              <div class="vtl2-arm"></div>
             </div>
             <div class="vtl2-bracket">
-              <span class="vtl2-label">Jan 2018</span>
-              <div class="vtl2-dot vtl2-dot--start"></div>
-              <div class="vtl2-bar" style="height:192px;"></div>
-              <div class="vtl2-dot vtl2-dot--end"></div>
               <span class="vtl2-label">Jan 2022</span>
+              <div class="vtl2-dot vtl2-dot--top-past"></div>
+              <div class="vtl2-bar" style="height:192px;"></div>
+              <div class="vtl2-dot vtl2-dot--btm"></div>
+              <span class="vtl2-label">Jan 2018</span>
             </div>
-            <div class="vtl2-spacer"></div>
+            <div></div>
           </div>
 
-          <!-- Shamood — RIGHT — ~1 month → bar 24px (min) -->
+          <!-- Shamood — RIGHT — 1 mo → 24px (min) -->
           <div class="vtl2-item vtl2-right">
-            <div class="vtl2-spacer"></div>
+            <div></div>
             <div class="vtl2-bracket">
-              <span class="vtl2-label">Jun 2016</span>
-              <div class="vtl2-dot vtl2-dot--start"></div>
-              <div class="vtl2-bar" style="height:24px;"></div>
-              <div class="vtl2-dot vtl2-dot--end"></div>
               <span class="vtl2-label">Jul 2016</span>
+              <div class="vtl2-dot vtl2-dot--top-past"></div>
+              <div class="vtl2-bar" style="height:24px;"></div>
+              <div class="vtl2-dot vtl2-dot--btm"></div>
+              <span class="vtl2-label">Jun 2016</span>
             </div>
-            <div class="vtl2-card-wrap">
-              <div class="vtl2-arm"></div>
+            <div class="vtl2-card-zone">
               <div class="vtl2-card">
                 <h3>Research &amp; Development Intern</h3>
                 <p class="vtl2-org">Shamood Daily Use Products · Ningbo, China</p>
@@ -641,9 +645,9 @@
             </div>
           </div>
 
-          <!-- UNNC RA — LEFT — ~2 months → bar 24px (min) -->
+          <!-- UNNC — LEFT — 2 mo → 28px -->
           <div class="vtl2-item vtl2-left">
-            <div class="vtl2-card-wrap">
+            <div class="vtl2-card-zone">
               <div class="vtl2-card">
                 <h3>Undergraduate Research Assistant</h3>
                 <p class="vtl2-org">University of Nottingham Ningbo China</p>
@@ -652,16 +656,15 @@
                   <span class="tag">Spectroscopy</span><span class="tag">Catalysis</span><span class="tag">Published</span>
                 </div>
               </div>
-              <div class="vtl2-arm"></div>
             </div>
             <div class="vtl2-bracket">
-              <span class="vtl2-label">Jun 2015</span>
-              <div class="vtl2-dot vtl2-dot--start"></div>
-              <div class="vtl2-bar" style="height:24px;"></div>
-              <div class="vtl2-dot vtl2-dot--end"></div>
               <span class="vtl2-label">Aug 2015</span>
+              <div class="vtl2-dot vtl2-dot--top-past"></div>
+              <div class="vtl2-bar" style="height:28px;"></div>
+              <div class="vtl2-dot vtl2-dot--btm"></div>
+              <span class="vtl2-label">Jun 2015</span>
             </div>
-            <div class="vtl2-spacer"></div>
+            <div></div>
           </div>
 
         </div>
