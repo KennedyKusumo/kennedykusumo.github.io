@@ -179,6 +179,46 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,142,247,0.15);
     }
 
+    /* ── Personal tab ── */
+    .personal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 1.25rem;
+      max-width: 900px;
+      padding-top: 0.25rem;
+    }
+    .personal-cat {
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      background: var(--color-surface);
+    }
+    .personal-cat-hdr {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--color-muted);
+      margin-bottom: 0.9rem;
+    }
+    .personal-items {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .personal-items li {
+      font-size: 0.875rem;
+      color: var(--color-text);
+    }
+    .personal-soon {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+      margin: 0;
+    }
+
     /* ── Hero quote ── */
     .hero-quote {
       margin-top: 1.75rem;
@@ -420,15 +460,15 @@
     <div class="container">
 
       <div class="tab-nav" role="tablist">
-        <button class="tab-btn active" role="tab" data-tab="projects">Projects</button>
+        <button class="tab-btn active" role="tab" data-tab="professional">Experiences</button>
+        <button class="tab-btn" role="tab" data-tab="projects">Projects</button>
         <button class="tab-btn" role="tab" data-tab="blogs">Technical Blogs</button>
-        <button class="tab-btn" role="tab" data-tab="professional">Experiences</button>
-        <button class="tab-btn" role="tab" data-tab="personal">Personal</button>
         <button class="tab-btn" role="tab" data-tab="nontechblogs">Non-technical Blogs</button>
+        <button class="tab-btn" role="tab" data-tab="personal">Personal</button>
       </div>
 
       <!-- ── Projects ── -->
-      <div id="tab-projects" class="tab-panel active" role="tabpanel">
+      <div id="tab-projects" class="tab-panel" role="tabpanel">
         <div class="card-grid">
 
           <a href="articles/msc-thesis-syngenta.html" style="text-decoration:none; color:inherit;">
@@ -552,7 +592,7 @@
       </div>
 
       <!-- ── Professional History ── -->
-      <div id="tab-professional" class="tab-panel" role="tabpanel">
+      <div id="tab-professional" class="tab-panel active" role="tabpanel">
 
         <!--
           Swimlane — 3 lanes, 12 px/month scale.
@@ -785,10 +825,34 @@
 
       <!-- ── Personal ── -->
       <div id="tab-personal" class="tab-panel" role="tabpanel">
-        <p style="color:var(--color-muted); font-size:0.9rem; max-width:48ch;">
-          This section is a placeholder — share what you'd like people to know
-          about you outside of work and I'll write it up.
-        </p>
+        <div class="personal-grid">
+
+          <div class="personal-cat">
+            <p class="personal-cat-hdr">Games</p>
+            <ul class="personal-items">
+              <li>Stardew Valley</li>
+              <li>Dota 2</li>
+              <li>Raft</li>
+              <li>Grounded</li>
+            </ul>
+          </div>
+
+          <div class="personal-cat">
+            <p class="personal-cat-hdr">Music</p>
+            <p class="personal-soon">Coming soon</p>
+          </div>
+
+          <div class="personal-cat">
+            <p class="personal-cat-hdr">Swimming</p>
+            <p class="personal-soon">Coming soon</p>
+          </div>
+
+          <div class="personal-cat">
+            <p class="personal-cat-hdr">Movies, Series &amp; Shows</p>
+            <p class="personal-soon">Coming soon</p>
+          </div>
+
+        </div>
       </div>
 
       <!-- ── Non-technical Blogs ── -->
