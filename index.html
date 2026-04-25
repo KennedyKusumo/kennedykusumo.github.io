@@ -179,6 +179,27 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,142,247,0.15);
     }
 
+    /* ── Hero quote ── */
+    .hero-quote {
+      margin-top: 1.75rem;
+      padding-left: 1rem;
+      border-left: 2px solid var(--color-border);
+      font-size: 0.85rem;
+      color: var(--color-muted);
+      font-style: italic;
+      max-width: 46ch;
+      line-height: 1.6;
+    }
+    .hero-quote cite {
+      display: block;
+      margin-top: 0.4rem;
+      font-style: normal;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      opacity: 0.55;
+      letter-spacing: 0.02em;
+    }
+
     /* ── Swimlane timeline (Experiences) ── */
 
     /* Lane header row above the swimlane */
@@ -387,6 +408,10 @@
         and process modelling — turning messy real-world problems into tools
         that actually get used.
       </p>
+      <blockquote class="hero-quote">
+        The futility of life means that we are alive to do one thing and one thing only: play!
+        <cite>— PhD Thesis Foreword</cite>
+      </blockquote>
     </div>
   </header>
 
@@ -427,6 +452,19 @@
             <p>
               Algorithms and a Python package for computing model-based experiments
               that are optimal to multiple objectives simultaneously.
+            </p>
+            <div class="card-meta">
+              <span>Imperial College London · 2018–2022</span>
+            </div>
+          </article>
+
+          <article class="card card-soon">
+            <p class="card-tag">PhD · Feasibility Analysis · Python</p>
+            <h3>DEUS: Probabilistic Design Space Characterisation for Pharmaceutical Manufacturing</h3>
+            <p>
+              Adapted the nested sampling algorithm to map pharmaceutical process design spaces
+              under model parameter uncertainty — sampling-based, gradient-free, and applicable
+              to black-box simulators.
             </p>
             <div class="card-meta">
               <span>Imperial College London · 2018–2022</span>
