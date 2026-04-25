@@ -200,11 +200,13 @@
     }
 
     /* Swimlane container — time flows top (newest) → bottom (oldest)
-       Scale: 12 px per month, origin Jun 2015, present Apr 2026 (130 mo) */
+       Scale: 12 px/month, origin Jun 2015 (m0), present Apr 2026 (m130)
+       Slot height = max(24, duration_months × 12)
+       UNNC bottom: top=1536 + h=24 → 1560 + 60 padding = 1620 */
     .swimlane {
       position: relative;
       max-width: 900px;
-      height: 1680px;
+      height: 1620px;
     }
 
     /* Year grid lines */
@@ -238,55 +240,87 @@
     .sl-present::after { background: var(--color-accent); opacity: 0.4; }
     .sl-present .sl-yr-lbl { color: var(--color-accent); }
 
-    /* Cards — absolutely positioned */
-    .sl-card {
+    /* ── Slot: time-proportional container, min 24 px so it's hoverable ── */
+    .sl-slot {
       position: absolute;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 0.85rem 1rem;
-      background: var(--color-surface);
       box-sizing: border-box;
-      overflow: hidden;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    }
-    .sl-card:hover {
-      border-color: var(--color-accent);
-      box-shadow: 0 6px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,142,247,0.15);
-      transform: scale(1.015);
-      z-index: 10;
-      overflow: visible;
+      overflow: visible;   /* panel can grow beyond slot height */
     }
     /* Lane 1 — left half */
     .sl-l1 { left: 65px; right: calc(50% + 5px); }
     /* Lane 2 — right half */
     .sl-l2 { left: calc(50% + 5px); right: 0; }
 
-    /* Card typography */
+    /* ── Bar: thin vertical strip, strictly time-proportional ── */
+    .sl-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 6px;
+      height: 100%;
+      border-radius: 3px;
+      background: var(--color-muted);
+      opacity: 0.3;
+      transition: opacity 0.18s ease, background 0.18s ease;
+      cursor: pointer;
+    }
+    /* Ongoing role gets accent colour */
+    .sl-slot--active .sl-bar {
+      background: var(--color-accent);
+      opacity: 0.5;
+    }
+    .sl-slot:hover .sl-bar {
+      background: var(--color-accent);
+      opacity: 0.85;
+    }
+
+    /* ── Panel: floating content card, anchored to slot top ── */
+    .sl-panel {
+      position: absolute;
+      top: 0;
+      left: 10px;
+      right: 0;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      background: var(--color-surface);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(79,142,247,0.08);
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-5px);
+      transition: opacity 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+    }
+    .sl-slot:hover .sl-panel {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+      border-color: var(--color-accent);
+    }
+
+    /* Panel typography */
     .sl-dates {
       display: block;
       font-size: 0.6rem;
       font-family: var(--font-mono);
       color: var(--color-muted);
       margin-bottom: 0.3rem;
-      opacity: 0.75;
+      opacity: 0.8;
     }
-    .sl-card h3    { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.2rem; line-height: 1.3; }
-    .sl-card .sl-org { font-size: 0.75rem; color: var(--color-accent); margin-bottom: 0.35rem; }
-    .sl-card p     { font-size: 0.835rem; color: var(--color-muted); line-height: 1.6; margin: 0; }
+    .sl-panel h3     { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.2rem; line-height: 1.3; }
+    .sl-panel .sl-org { font-size: 0.75rem; color: var(--color-accent); margin-bottom: 0.35rem; }
+    .sl-panel p      { font-size: 0.835rem; color: var(--color-muted); line-height: 1.6; margin: 0; }
 
-    /* Compact cards — smaller padding, body hidden */
-    .sl-compact              { padding: 0.6rem 0.85rem; }
-    .sl-compact h3           { font-size: 0.82rem; }
-    .sl-compact .sl-body     { display: none; }
-
-    /* Mobile — stack vertically, natural height */
+    /* Mobile — stack as plain cards, always visible */
     @media (max-width: 600px) {
-      .swimlane       { height: auto; display: flex; flex-direction: column; gap: 0; }
-      .sl-card        { position: static; width: 100%; height: auto !important; margin-bottom: 0.75rem; }
-      .sl-l1, .sl-l2  { left: 0; right: 0; }
-      .sl-yr          { display: none; }
-      .sl-headers     { display: none; }
-      .sl-compact .sl-body { display: block; }
+      .swimlane         { height: auto; display: flex; flex-direction: column; gap: 0.75rem; }
+      .sl-slot          { position: static; width: 100%; height: auto !important; }
+      .sl-l1, .sl-l2    { left: 0; right: 0; }
+      .sl-bar           { display: none; }
+      .sl-panel         { position: static; opacity: 1; pointer-events: auto;
+                          transform: none; box-shadow: none; left: 0; right: 0; }
+      .sl-yr            { display: none; }
+      .sl-headers       { display: none; }
     }
   </style>
 </head>
@@ -428,13 +462,14 @@
       <div id="tab-professional" class="tab-panel" role="tabpanel">
 
         <!--
-          Swimlane: time-proportional, 12 px / month.
-          Origin: Jun 2015 (month 0).  Present: Apr 2026 (month 130).
-          card top    = (130 − end_month) × 12 + 4
-          card height = max(80, duration_months × 12) − 4
+          Swimlane Option C: thin time-proportional bar + floating panel on hover.
+          Scale: 12 px/month.  Origin: Jun 2015 (m0).  Present: Apr 2026 (m130).
+          slot top    = (130 − end_month) × 12
+          slot height = max(24, duration_months × 12)   ← 24 px minimum to hover
+          Panel: position: absolute; top: 0; left: 10px; right: 0; height: auto — never clipped.
 
-          Lane 1 (left)  — primary / full-time:  AZ, ICL RA, PhD, UNNC
-          Lane 2 (right) — concurrent / intern:   Sheffield, Eli Lilly, Shamood
+          Lane 1 (left)  — primary:             AZ (m96–130), ICL RA (m79–95), PhD (m31–79), UNNC (m0–2)
+          Lane 2 (right) — concurrent/intern:   Sheffield (m81–91), Eli Lilly (m55–62), Shamood (m12–13)
         -->
 
         <!-- Lane headers -->
@@ -467,12 +502,13 @@
 
           <!-- ── Lane 1: Primary ── -->
 
-          <!-- AstraZeneca: end=Apr 2026 (m130), start=Jun 2023 (m96), 34 mo → top=4, h=404 -->
-          <div class="sl-card sl-l1" style="top:4px;height:404px;">
-            <span class="sl-dates">Jun 2023 – Present</span>
-            <h3>Senior Modelling &amp; Simulation Scientist</h3>
-            <p class="sl-org">AstraZeneca · London, UK</p>
-            <div class="sl-body">
+          <!-- AstraZeneca: end=m130, start=m96, 34 mo → top=0, h=408 -->
+          <div class="sl-slot sl-l1 sl-slot--active" style="top:0px;height:408px;">
+            <div class="sl-bar"></div>
+            <div class="sl-panel">
+              <span class="sl-dates">Jun 2023 – Present</span>
+              <h3>Senior Modelling &amp; Simulation Scientist</h3>
+              <p class="sl-org">AstraZeneca · London, UK</p>
               <p>Building mathematical models of pharmaceutical manufacturing processes across small molecule drug substance and drug product development. Developing and deploying web apps to democratise modelling capabilities across AZ's Digital Science team.</p>
               <div class="timeline-tags" style="margin-top:0.6rem;">
                 <span class="tag">Process Modelling</span><span class="tag">Python</span><span class="tag">ML</span><span class="tag">Web Apps</span><span class="tag">CMC</span>
@@ -480,12 +516,13 @@
             </div>
           </div>
 
-          <!-- ICL RA: end=May 2023 (m95), start=Jan 2022 (m79), 16 mo → top=424, h=188 -->
-          <div class="sl-card sl-l1" style="top:424px;height:188px;">
-            <span class="sl-dates">Jan 2022 – May 2023</span>
-            <h3>Research Associate</h3>
-            <p class="sl-org">Imperial College London · London, UK</p>
-            <div class="sl-body">
+          <!-- ICL RA: end=m95, start=m79, 16 mo → top=420, h=192 -->
+          <div class="sl-slot sl-l1" style="top:420px;height:192px;">
+            <div class="sl-bar"></div>
+            <div class="sl-panel">
+              <span class="sl-dates">Jan 2022 – May 2023</span>
+              <h3>Research Associate</h3>
+              <p class="sl-org">Imperial College London · London, UK</p>
               <p>PharmaSEL-Prosperity Partnership. Developed multi-objective optimal experiment design algorithms and Python packages in collaboration with Eli Lilly and Company.</p>
               <div class="timeline-tags" style="margin-top:0.6rem;">
                 <span class="tag">OED</span><span class="tag">Optimisation</span><span class="tag">Python</span><span class="tag">Pharma</span>
@@ -493,12 +530,13 @@
             </div>
           </div>
 
-          <!-- PhD: end=Jan 2022 (m79), start=Jan 2018 (m31), 48 mo → top=616, h=572 -->
-          <div class="sl-card sl-l1" style="top:616px;height:572px;">
-            <span class="sl-dates">Jan 2018 – Jan 2022</span>
-            <h3>PhD Researcher · Academic Tutor · Assistant Lecturer</h3>
-            <p class="sl-org">Imperial College London · London, UK</p>
-            <div class="sl-body">
+          <!-- PhD: end=m79, start=m31, 48 mo → top=612, h=576 -->
+          <div class="sl-slot sl-l1" style="top:612px;height:576px;">
+            <div class="sl-bar"></div>
+            <div class="sl-panel">
+              <span class="sl-dates">Jan 2018 – Jan 2022</span>
+              <h3>PhD Researcher · Academic Tutor · Assistant Lecturer</h3>
+              <p class="sl-org">Imperial College London · London, UK</p>
               <p>Developed Pydex (optimal experiment design) and DEUS (feasibility analysis via nested sampling). Lectured on mathematical optimisation and AIMMS for the MSc Sustainable Energy Futures programme. Tutored undergraduates in process analysis, separations, and reactor design.</p>
               <div class="timeline-tags" style="margin-top:0.6rem;">
                 <span class="tag">PhD</span><span class="tag">Pydex</span><span class="tag">DEUS</span><span class="tag">Teaching</span><span class="tag">AIMMS</span>
@@ -506,14 +544,15 @@
             </div>
           </div>
 
-          <!-- UNNC: end=Aug 2015 (m2), start=Jun 2015 (m0), 2 mo → top=1540, h=76 (compact) -->
-          <div class="sl-card sl-l1 sl-compact" style="top:1540px;height:76px;">
-            <span class="sl-dates">Jun – Aug 2015</span>
-            <h3>Undergraduate Research Assistant</h3>
-            <p class="sl-org">University of Nottingham Ningbo China</p>
-            <div class="sl-body">
+          <!-- UNNC: end=m2, start=m0, 2 mo → top=1536, h=24 (min) -->
+          <div class="sl-slot sl-l1" style="top:1536px;height:24px;">
+            <div class="sl-bar"></div>
+            <div class="sl-panel">
+              <span class="sl-dates">Jun – Aug 2015</span>
+              <h3>Undergraduate Research Assistant</h3>
+              <p class="sl-org">University of Nottingham Ningbo China</p>
               <p>Photocatalytic activity of a rhenium-based organometallic catalyst for CO₂ capture. Results published in <em>Polyhedron</em>.</p>
-              <div class="timeline-tags" style="margin-top:0.5rem;">
+              <div class="timeline-tags" style="margin-top:0.6rem;">
                 <span class="tag">Spectroscopy</span><span class="tag">Catalysis</span><span class="tag">Published</span>
               </div>
             </div>
@@ -521,39 +560,42 @@
 
           <!-- ── Lane 2: Concurrent & Internships ── -->
 
-          <!-- Sheffield: end=Jan 2023 (m91), start=Mar 2022 (m81), 10 mo → top=472, h=116 -->
-          <div class="sl-card sl-l2" style="top:472px;height:116px;">
-            <span class="sl-dates">Mar 2022 – Jan 2023</span>
-            <h3>Research Associate <span style="font-weight:400;color:var(--color-muted);">· Part-time</span></h3>
-            <p class="sl-org">University of Sheffield · Remote</p>
-            <div class="sl-body">
-              <p>Wellcome Leap R3. mRNA vaccine manufacturing models and optimal experimental campaigns for pandemic-response.</p>
-              <div class="timeline-tags" style="margin-top:0.5rem;">
+          <!-- Sheffield: end=m91, start=m81, 10 mo → top=468, h=120 -->
+          <div class="sl-slot sl-l2" style="top:468px;height:120px;">
+            <div class="sl-bar"></div>
+            <div class="sl-panel">
+              <span class="sl-dates">Mar 2022 – Jan 2023</span>
+              <h3>Research Associate <span style="font-weight:400;color:var(--color-muted);">· Part-time</span></h3>
+              <p class="sl-org">University of Sheffield · Remote</p>
+              <p>Wellcome Leap R3 project. Developed mathematical models of mRNA vaccine production and recommended optimal experimental campaigns for pandemic-response manufacturing.</p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
                 <span class="tag">mRNA</span><span class="tag">Process Modelling</span><span class="tag">Vaccine Manufacturing</span>
               </div>
             </div>
           </div>
 
-          <!-- Eli Lilly: end=Aug 2020 (m62), start=Jan 2020 (m55), 7 mo → top=820, h=80 (compact) -->
-          <div class="sl-card sl-l2 sl-compact" style="top:820px;height:80px;">
-            <span class="sl-dates">Jan – Aug 2020</span>
-            <h3>Process Engineering Intern</h3>
-            <p class="sl-org">Eli Lilly and Company · Indianapolis, USA</p>
-            <div class="sl-body">
-              <p>Built a stochastic dynamic model of the liquid-phase synthesis reactor used in Mounjaro production. Planned optimal experimental campaigns alongside Eli Lilly engineers.</p>
-              <div class="timeline-tags" style="margin-top:0.5rem;">
+          <!-- Eli Lilly: end=m62, start=m55, 7 mo → top=816, h=84 -->
+          <div class="sl-slot sl-l2" style="top:816px;height:84px;">
+            <div class="sl-bar"></div>
+            <div class="sl-panel">
+              <span class="sl-dates">Jan – Aug 2020</span>
+              <h3>Process Engineering Intern</h3>
+              <p class="sl-org">Eli Lilly and Company · Indianapolis, USA</p>
+              <p>Built a stochastic dynamic model of the liquid-phase synthesis reactor used in production of Mounjaro. Planned optimal experimental campaigns alongside Eli Lilly engineers.</p>
+              <div class="timeline-tags" style="margin-top:0.6rem;">
                 <span class="tag">Dynamic Modelling</span><span class="tag">Stochastic</span><span class="tag">OED</span>
               </div>
             </div>
           </div>
 
-          <!-- Shamood: end=Jul 2016 (m13), start=Jun 2016 (m12), 1 mo → top=1408, h=76 (compact) -->
-          <div class="sl-card sl-l2 sl-compact" style="top:1408px;height:76px;">
-            <span class="sl-dates">Jun – Jul 2016</span>
-            <h3>R&amp;D Intern</h3>
-            <p class="sl-org">Shamood Daily Use Products · Ningbo, China</p>
-            <div class="sl-body">
-              <p>Quality assurance testing for air freshener products. Reduced testing time by ~10% through efficient protocols.</p>
+          <!-- Shamood: end=m13, start=m12, 1 mo → top=1404, h=24 (min) -->
+          <div class="sl-slot sl-l2" style="top:1404px;height:24px;">
+            <div class="sl-bar"></div>
+            <div class="sl-panel">
+              <span class="sl-dates">Jun – Jul 2016</span>
+              <h3>R&amp;D Intern</h3>
+              <p class="sl-org">Shamood Daily Use Products · Ningbo, China</p>
+              <p>Quality assurance testing for air freshener products. Reduced overall testing time by ~10% through more efficient test protocols.</p>
             </div>
           </div>
 
