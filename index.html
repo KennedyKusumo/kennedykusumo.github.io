@@ -211,6 +211,157 @@
       .vtl-node { width: auto; flex-direction: column; align-items: center; gap: 0.3rem; padding-top: 1rem; }
       .vtl-item { gap: 0.75rem; }
     }
+
+    /* ── Centre-spine alternating timeline (Professional History) ── */
+    .vtl2 {
+      position: relative;
+      max-width: 900px;
+    }
+
+    /* Centre spine */
+    .vtl2::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      transform: translateX(-50%);
+      background: var(--color-border);
+      z-index: 0;
+    }
+
+    /* Each item: [side 1fr | bracket 60px | side 1fr] */
+    .vtl2-item {
+      display: grid;
+      grid-template-columns: 1fr 60px 1fr;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .vtl2-item:last-child { margin-bottom: 0; }
+
+    /* Bracket: the centre column — dots, bar, labels */
+    .vtl2-bracket {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .vtl2-label {
+      font-size: 0.58rem;
+      color: var(--color-muted);
+      font-family: var(--font-mono);
+      line-height: 1;
+      text-align: center;
+      height: 16px; /* fixed — used to calculate arm offset */
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .vtl2-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .vtl2-dot--start {
+      background: var(--color-accent);
+      border: 2px solid var(--color-accent);
+    }
+
+    .vtl2-dot--end {
+      background: var(--color-surface);
+      border: 2px solid var(--color-muted);
+    }
+
+    .vtl2-bar {
+      width: 2px;
+      background: var(--color-border);
+      /* height set inline per item, proportional to duration */
+    }
+
+    /* Card wrap: holds arm + card */
+    .vtl2-card-wrap {
+      display: flex;
+      align-items: flex-start;
+      /* pad top = label height (16px), aligning arm with start dot */
+      padding-top: 16px;
+    }
+
+    .vtl2-right .vtl2-card-wrap { flex-direction: row; }
+    .vtl2-left  .vtl2-card-wrap { flex-direction: row-reverse; }
+
+    /* Arm: horizontal connector from bracket to card */
+    .vtl2-arm {
+      flex-shrink: 0;
+      width: 18px;
+      height: 1px;
+      background: var(--color-border);
+      /* vertically centre on start dot: dot is 11px, arm is 1px → offset 5px */
+      margin-top: 5px;
+      align-self: flex-start;
+    }
+
+    /* Card */
+    .vtl2-card {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 1.1rem 1.35rem;
+      background: var(--color-surface);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .vtl2-item:hover .vtl2-dot--start {
+      transform: scale(1.4);
+      box-shadow: 0 0 0 4px rgba(79, 142, 247, 0.18);
+    }
+
+    .vtl2-item:hover .vtl2-card {
+      transform: translateY(-4px);
+      border-color: var(--color-accent);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,142,247,0.15);
+    }
+
+    .vtl2-card h3 {
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      line-height: 1.35;
+    }
+
+    .vtl2-card .vtl2-org {
+      font-size: 0.78rem;
+      color: var(--color-accent);
+      margin-bottom: 0.45rem;
+    }
+
+    .vtl2-card p {
+      font-size: 0.855rem;
+      color: var(--color-muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* Mobile: collapse to right-only, spine moves left */
+    @media (max-width: 600px) {
+      .vtl2::before { left: 30px; }
+      .vtl2-item,
+      .vtl2-item.vtl2-left {
+        grid-template-columns: 60px 1fr;
+      }
+      .vtl2-item .vtl2-spacer { display: none; }
+      .vtl2-item.vtl2-left .vtl2-card-wrap { flex-direction: row; }
+      .vtl2-item.vtl2-left > *:last-child { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -349,161 +500,168 @@
 
       <!-- ── Professional History ── -->
       <div id="tab-professional" class="tab-panel" role="tabpanel">
-        <div class="vtl">
+        <div class="vtl2">
 
-          <div class="vtl-item">
-            <div class="vtl-node">
-              <span class="vtl-date">Jun<br>2023</span>
-              <div class="vtl-dot"></div>
+          <!-- AstraZeneca — RIGHT — ~34 months → bar 136px -->
+          <div class="vtl2-item vtl2-right">
+            <div class="vtl2-spacer"></div>
+            <div class="vtl2-bracket">
+              <span class="vtl2-label">Jun 2023</span>
+              <div class="vtl2-dot vtl2-dot--start"></div>
+              <div class="vtl2-bar" style="height:136px;"></div>
+              <div class="vtl2-dot vtl2-dot--end"></div>
+              <span class="vtl2-label">Present</span>
             </div>
-            <div class="vtl-card">
-              <p class="vtl-duration">Jun 2023 – Present</p>
-              <h3>Senior Modelling and Simulation Scientist</h3>
-              <p class="vtl-org">AstraZeneca · London, UK</p>
-              <p>
-                Building mathematical models of pharmaceutical manufacturing processes
-                across small molecule drug substance and drug product development.
-                Developing and deploying web apps to democratise modelling capabilities
-                across AZ's Digital Science team.
-              </p>
-              <div class="timeline-tags" style="margin-top:0.6rem;">
-                <span class="tag">Process Modelling</span>
-                <span class="tag">Python</span>
-                <span class="tag">ML</span>
-                <span class="tag">Web Apps</span>
-                <span class="tag">CMC</span>
+            <div class="vtl2-card-wrap">
+              <div class="vtl2-arm"></div>
+              <div class="vtl2-card">
+                <h3>Senior Modelling &amp; Simulation Scientist</h3>
+                <p class="vtl2-org">AstraZeneca · London, UK</p>
+                <p>Building mathematical models of pharmaceutical manufacturing processes across small molecule drug substance and drug product development. Developing and deploying web apps to democratise modelling capabilities across AZ's Digital Science team.</p>
+                <div class="timeline-tags" style="margin-top:0.6rem;">
+                  <span class="tag">Process Modelling</span><span class="tag">Python</span><span class="tag">ML</span><span class="tag">Web Apps</span><span class="tag">CMC</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="vtl-item">
-            <div class="vtl-node">
-              <span class="vtl-date">Jan<br>2022</span>
-              <div class="vtl-dot"></div>
+          <!-- ICL Research Associate — LEFT — ~16 months → bar 64px -->
+          <!-- Overlaps with Sheffield RA → opposite sides -->
+          <div class="vtl2-item vtl2-left">
+            <div class="vtl2-card-wrap">
+              <div class="vtl2-card">
+                <h3>Research Associate</h3>
+                <p class="vtl2-org">Imperial College London · London, UK</p>
+                <p>PharmaSEL-Prosperity Partnership. Developed multi-objective optimal experiment design algorithms and Python packages in collaboration with Eli Lilly and Company.</p>
+                <div class="timeline-tags" style="margin-top:0.6rem;">
+                  <span class="tag">OED</span><span class="tag">Optimisation</span><span class="tag">Python</span><span class="tag">Pharma</span>
+                </div>
+              </div>
+              <div class="vtl2-arm"></div>
             </div>
-            <div class="vtl-card">
-              <p class="vtl-duration">Jan 2022 – May 2023</p>
-              <h3>Research Associate</h3>
-              <p class="vtl-org">Imperial College London · London, UK</p>
-              <p>
-                PharmaSEL-Prosperity Partnership. Developed multi-objective optimal
-                experiment design algorithms and Python packages in collaboration with
-                Eli Lilly and Company.
-              </p>
-              <div class="timeline-tags" style="margin-top:0.6rem;">
-                <span class="tag">OED</span>
-                <span class="tag">Optimisation</span>
-                <span class="tag">Python</span>
-                <span class="tag">Pharma</span>
+            <div class="vtl2-bracket">
+              <span class="vtl2-label">Jan 2022</span>
+              <div class="vtl2-dot vtl2-dot--start"></div>
+              <div class="vtl2-bar" style="height:64px;"></div>
+              <div class="vtl2-dot vtl2-dot--end"></div>
+              <span class="vtl2-label">May 2023</span>
+            </div>
+            <div class="vtl2-spacer"></div>
+          </div>
+
+          <!-- Sheffield RA — RIGHT — ~10 months → bar 40px -->
+          <!-- Overlaps with ICL RA → opposite sides -->
+          <div class="vtl2-item vtl2-right">
+            <div class="vtl2-spacer"></div>
+            <div class="vtl2-bracket">
+              <span class="vtl2-label">Mar 2022</span>
+              <div class="vtl2-dot vtl2-dot--start"></div>
+              <div class="vtl2-bar" style="height:40px;"></div>
+              <div class="vtl2-dot vtl2-dot--end"></div>
+              <span class="vtl2-label">Jan 2023</span>
+            </div>
+            <div class="vtl2-card-wrap">
+              <div class="vtl2-arm"></div>
+              <div class="vtl2-card">
+                <h3>Research Associate <span style="font-weight:400;color:var(--color-muted);">· Part-time</span></h3>
+                <p class="vtl2-org">University of Sheffield · Remote</p>
+                <p>Wellcome Leap R3 project. Developed mathematical models of mRNA vaccine production and recommended optimal experimental campaigns for pandemic-response manufacturing.</p>
+                <div class="timeline-tags" style="margin-top:0.6rem;">
+                  <span class="tag">mRNA</span><span class="tag">Process Modelling</span><span class="tag">Vaccine Manufacturing</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="vtl-item">
-            <div class="vtl-node">
-              <span class="vtl-date">Mar<br>2022</span>
-              <div class="vtl-dot"></div>
+          <!-- Eli Lilly — RIGHT — ~7 months → bar 28px -->
+          <!-- Overlaps with PhD → opposite sides -->
+          <div class="vtl2-item vtl2-right">
+            <div class="vtl2-spacer"></div>
+            <div class="vtl2-bracket">
+              <span class="vtl2-label">Jan 2020</span>
+              <div class="vtl2-dot vtl2-dot--start"></div>
+              <div class="vtl2-bar" style="height:28px;"></div>
+              <div class="vtl2-dot vtl2-dot--end"></div>
+              <span class="vtl2-label">Aug 2020</span>
             </div>
-            <div class="vtl-card">
-              <p class="vtl-duration">Mar 2022 – Jan 2023 · Part-time</p>
-              <h3>Research Associate</h3>
-              <p class="vtl-org">University of Sheffield · Remote</p>
-              <p>
-                Wellcome Leap R3 project. Developed mathematical models of mRNA
-                vaccine production and recommended optimal experimental campaigns
-                for pandemic-response manufacturing.
-              </p>
-              <div class="timeline-tags" style="margin-top:0.6rem;">
-                <span class="tag">mRNA</span>
-                <span class="tag">Process Modelling</span>
-                <span class="tag">Vaccine Manufacturing</span>
+            <div class="vtl2-card-wrap">
+              <div class="vtl2-arm"></div>
+              <div class="vtl2-card">
+                <h3>Process Engineering Intern</h3>
+                <p class="vtl2-org">Eli Lilly and Company · Indianapolis, USA</p>
+                <p>Built a stochastic dynamic model of the liquid-phase synthesis reactor used in production of Mounjaro. Planned optimal experimental campaigns alongside Eli Lilly engineers.</p>
+                <div class="timeline-tags" style="margin-top:0.6rem;">
+                  <span class="tag">Dynamic Modelling</span><span class="tag">Stochastic</span><span class="tag">OED</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="vtl-item">
-            <div class="vtl-node">
-              <span class="vtl-date">Jan<br>2020</span>
-              <div class="vtl-dot"></div>
+          <!-- PhD Imperial — LEFT — ~48 months → bar 192px -->
+          <!-- Overlaps with Eli Lilly → opposite sides -->
+          <div class="vtl2-item vtl2-left">
+            <div class="vtl2-card-wrap">
+              <div class="vtl2-card">
+                <h3>PhD Researcher · Academic Tutor · Assistant Lecturer</h3>
+                <p class="vtl2-org">Imperial College London · London, UK</p>
+                <p>Developed Pydex (optimal experiment design) and DEUS (feasibility analysis via nested sampling). Lectured on mathematical optimisation and AIMMS for the MSc Sustainable Energy Futures programme. Tutored undergraduates in process analysis, separations, and reactor design.</p>
+                <div class="timeline-tags" style="margin-top:0.6rem;">
+                  <span class="tag">PhD</span><span class="tag">Pydex</span><span class="tag">DEUS</span><span class="tag">Teaching</span><span class="tag">AIMMS</span>
+                </div>
+              </div>
+              <div class="vtl2-arm"></div>
             </div>
-            <div class="vtl-card">
-              <p class="vtl-duration">Jan 2020 – Aug 2020</p>
-              <h3>Process Engineering Intern</h3>
-              <p class="vtl-org">Eli Lilly and Company · Indianapolis, USA</p>
-              <p>
-                Built a stochastic dynamic model of the liquid-phase synthesis reactor
-                used in production of Mounjaro. Planned optimal experimental campaigns
-                alongside Eli Lilly engineers.
-              </p>
-              <div class="timeline-tags" style="margin-top:0.6rem;">
-                <span class="tag">Dynamic Modelling</span>
-                <span class="tag">Stochastic</span>
-                <span class="tag">OED</span>
+            <div class="vtl2-bracket">
+              <span class="vtl2-label">Jan 2018</span>
+              <div class="vtl2-dot vtl2-dot--start"></div>
+              <div class="vtl2-bar" style="height:192px;"></div>
+              <div class="vtl2-dot vtl2-dot--end"></div>
+              <span class="vtl2-label">Jan 2022</span>
+            </div>
+            <div class="vtl2-spacer"></div>
+          </div>
+
+          <!-- Shamood — RIGHT — ~1 month → bar 24px (min) -->
+          <div class="vtl2-item vtl2-right">
+            <div class="vtl2-spacer"></div>
+            <div class="vtl2-bracket">
+              <span class="vtl2-label">Jun 2016</span>
+              <div class="vtl2-dot vtl2-dot--start"></div>
+              <div class="vtl2-bar" style="height:24px;"></div>
+              <div class="vtl2-dot vtl2-dot--end"></div>
+              <span class="vtl2-label">Jul 2016</span>
+            </div>
+            <div class="vtl2-card-wrap">
+              <div class="vtl2-arm"></div>
+              <div class="vtl2-card">
+                <h3>Research &amp; Development Intern</h3>
+                <p class="vtl2-org">Shamood Daily Use Products · Ningbo, China</p>
+                <p>Quality assurance testing for air freshener products. Reduced overall testing time by ~10% through more efficient test protocols.</p>
               </div>
             </div>
           </div>
 
-          <div class="vtl-item">
-            <div class="vtl-node">
-              <span class="vtl-date">Jan<br>2018</span>
-              <div class="vtl-dot"></div>
-            </div>
-            <div class="vtl-card">
-              <p class="vtl-duration">Jan 2018 – Jan 2022</p>
-              <h3>PhD Researcher / Academic Tutor / Assistant Lecturer</h3>
-              <p class="vtl-org">Imperial College London · London, UK</p>
-              <p>
-                Developed Pydex (single-objective OED) and DEUS (feasibility analysis
-                via nested sampling). Lectured on mathematical optimisation and AIMMS
-                for the MSc Sustainable Energy Futures programme. Tutored undergraduates
-                in process analysis, separations, and reactor design.
-              </p>
-              <div class="timeline-tags" style="margin-top:0.6rem;">
-                <span class="tag">PhD</span>
-                <span class="tag">Pydex</span>
-                <span class="tag">DEUS</span>
-                <span class="tag">Teaching</span>
-                <span class="tag">AIMMS</span>
+          <!-- UNNC RA — LEFT — ~2 months → bar 24px (min) -->
+          <div class="vtl2-item vtl2-left">
+            <div class="vtl2-card-wrap">
+              <div class="vtl2-card">
+                <h3>Undergraduate Research Assistant</h3>
+                <p class="vtl2-org">University of Nottingham Ningbo China</p>
+                <p>Investigated photocatalytic activity of a rhenium-based organometallic catalyst for CO₂ capture under supervision of Dr. Peter Summers. Results published in <em>Polyhedron</em>.</p>
+                <div class="timeline-tags" style="margin-top:0.6rem;">
+                  <span class="tag">Spectroscopy</span><span class="tag">Catalysis</span><span class="tag">Published</span>
+                </div>
               </div>
+              <div class="vtl2-arm"></div>
             </div>
-          </div>
-
-          <div class="vtl-item">
-            <div class="vtl-node">
-              <span class="vtl-date">Jun<br>2016</span>
-              <div class="vtl-dot"></div>
+            <div class="vtl2-bracket">
+              <span class="vtl2-label">Jun 2015</span>
+              <div class="vtl2-dot vtl2-dot--start"></div>
+              <div class="vtl2-bar" style="height:24px;"></div>
+              <div class="vtl2-dot vtl2-dot--end"></div>
+              <span class="vtl2-label">Aug 2015</span>
             </div>
-            <div class="vtl-card">
-              <p class="vtl-duration">Jun 2016 – Jul 2016</p>
-              <h3>Research and Development Intern</h3>
-              <p class="vtl-org">Shamood Daily Use Products · Ningbo, China</p>
-              <p>
-                Quality assurance testing for air freshener products. Reduced overall
-                testing time by ~10% through more efficient test protocols.
-              </p>
-            </div>
-          </div>
-
-          <div class="vtl-item">
-            <div class="vtl-node">
-              <span class="vtl-date">Jun<br>2015</span>
-              <div class="vtl-dot"></div>
-            </div>
-            <div class="vtl-card">
-              <p class="vtl-duration">Jun 2015 – Aug 2015</p>
-              <h3>Undergraduate Research Assistant</h3>
-              <p class="vtl-org">University of Nottingham Ningbo China</p>
-              <p>
-                Investigated photocatalytic activity of a rhenium-based organometallic
-                catalyst for CO₂ capture under supervision of Dr. Peter Summers.
-                Results published in <em>Polyhedron</em>.
-              </p>
-              <div class="timeline-tags" style="margin-top:0.6rem;">
-                <span class="tag">Spectroscopy</span>
-                <span class="tag">Catalysis</span>
-                <span class="tag">Published</span>
-              </div>
-            </div>
+            <div class="vtl2-spacer"></div>
           </div>
 
         </div>
