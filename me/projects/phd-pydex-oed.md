@@ -1,169 +1,300 @@
-# PhD Research — Algorithms and Tools for Feasibility Analysis and Optimal Experiment Design
+# PhD Thesis — Algorithms and Tools for Feasibility Analysis and Optimal Experiment Design in Pharmaceutical Manufacturing
 
-**Institution:** Imperial College London, Department of Chemical Engineering
+**Author:** Kennedy P. Kusumo
+**Institution:** Imperial College London — Sargent Centre for Process Systems Engineering, Department of Chemical Engineering
+**Submitted:** September 2021
+**Degree:** Doctor of Philosophy in Chemical Engineering and the Diploma of Imperial College
 **Duration:** January 2018 – January 2022
-**Supervisors:** Prof. Nilay Shah · Prof. Benoît Chachuat (Imperial) · Dr. Federico Galvanin (UCL) · Prof. Salvador García-Muñoz (Eli Lilly, external)
+
+**Supervisors:**
+- Prof. Benoît Chachuat (Imperial College London) — primary supervisor, meticulous guidance
+- Prof. Nilay Shah (Imperial College London) — academic freedom, PSE community leadership
+- Prof. Salvador García-Muñoz (Eli Lilly and Company) — industrial direction, practicality vs. generality balance
+
+**Key collaborators:** Dr. Lucian Gomoescu, Dr. Kamal Kuriyan, Dr. Shankar Vaidyaraman (Eli Lilly)
 **Industrial collaborator:** Eli Lilly and Company
+**Sponsoring body:** PharmaSEL-Prosperity Partnership (PI: Prof. Claire Adjiman)
+**Funding:** EPSRC
 
 ---
 
-## Research Summary
+## Thesis Abstract
 
-Kennedy's PhD focused on **model-based design of experiments (MBDOE)** — the science of designing informative experiments to accelerate and reduce the cost of developing mathematical models of chemical and pharmaceutical processes.
+The growing need for systematic and risk-based approaches to tackling challenges within the process industry prompted research into model-based methodologies. Of particular interest is the **Quality by Design (QbD)** initiative in the pharmaceutical industry.
 
-Two core deliverables:
-1. **Novel MBDOE algorithms** — addressing fundamental limitations in the state-of-the-art
-2. **Software tools** — open-source Python packages implementing existing and novel techniques
+This thesis reports contributions to two areas: **feasibility analysis** and **optimal experiment design**.
 
-Primary output: **Pydex** (single-objective MBDOE-PE) and **DEUS** (feasibility analysis via nested sampling), both open-source Python packages used in pharmaceutical process R&D.
+**Part 1 — Feasibility Analysis (Chapters 2–4):** Adaptation of the nested sampling algorithm for probabilistic design space characterization.
+- Ch 2: Initial adaptation of nested sampling for probabilistic design space characterization — competitive with optimization-based approaches
+- Ch 3: Two strategic + one implementation improvements, enabling larger problems
+- Ch 4: Design centering methodology — computes the largest volume box inside the probabilistic design space (practical format for communicating to process operators)
 
----
+**Part 2 — Optimal Experiment Design (Chapters 5–7):** Novel techniques for calibrating nonlinear models under uncertainty.
+- Ch 5: Continuous-effort methodology for optimal experimental campaigns
+- Ch 6: Bi-objective Average/CVaR framework for risk-mitigated experiment design under model uncertainty
+- Ch 7: Robust optimal experimental campaigns under operational constraints — integrates nested sampling (Part 1) with continuous-effort design (Ch 5)
 
-## Background & Motivation
-
-Mathematical models are central to process systems engineering (PSE). Their development requires experimentation, and experimentation is expensive — especially in pharmaceutical R&D where materials are scarce, safety constraints are tight, and regulatory requirements are strict.
-
-**Two types of uncertainty** exist in any model:
-- **Structural uncertainty**: we cannot prove our proposed model structure is correct
-- **Parametric uncertainty**: parameters are estimated from noisy experimental data → uncertain parameter estimates
-
-**MBDOE** uses mathematical models to ask: *"Given what we know, what experiment would tell us the most?"* Two sub-fields:
-- **MBDOE-MD** (model discrimination): choose among competing model structures
-- **MBDOE-PE** (parameter estimation): reduce uncertainty in parameter estimates — Kennedy's primary focus
-
-### Why this matters in pharma
-The **Design Space (DS)** concept from ICH Q8 (Quality-by-Design framework): the multidimensional combination of input variables and process parameters that provide assurance of product quality. DS characterization requires well-parameterized mechanistic models. Poor experiment design → high parametric uncertainty → uncertain DS → regulatory risk.
+**Software deliverables:**
+- **DEUS** — Python package for feasibility analysis (nested sampling)
+- **Pydex** — Python package for optimal experiment design
 
 ---
 
-## Key Literature Survey Findings (ESA Report, Dec 2018)
+## Motivation and Context
 
-### Standard MBDOE-PE Framework
+### Quality by Design (QbD) in Pharma
+The ICH Q8 initiative promotes a scientific, risk-based approach to pharmaceutical process and product development. Central to this is the **Design Space (DS)**: *"the multidimensional combination and interaction of input variables and process parameters that have been demonstrated to provide assurance of quality."*
 
-The **Fisher Information Matrix (FIM)**, M(θ, φ), is central:
+DS characterization requires well-parameterized mechanistic process models. The challenge: building these models demands informative experiments, which are expensive in pharma (scarce materials, safety constraints, regulatory oversight).
+
+### Process Systems Engineering (PSE)
+Kennedy's work sits within PSE — a subfield of chemical engineering using mathematics and computers to tackle complex process problems holistically. PSE broadened from traditional refining/chemicals to pharmaceuticals, biological processes, energy systems, and agriculture.
+
+The research directly addresses:
+- **How to characterise the design space** robustly under model parameter uncertainty
+- **How to design experiments** that most efficiently calibrate models, especially early in development when parameter estimates are poor
+
+---
+
+## Part 1: Feasibility Analysis
+
+### Background: The Design Space Problem
+
+For a steady-state process with uncertain model parameters θ ~ p(θ), the probabilistic design space at reliability α is:
 
 ```
-M(θ, φ) = Σ (1/σ²_oo') · S_o^T · S_o' + M₀
+DS(α) = { u ∈ U | P(g(x,u,θ) ≤ 0) ≥ α }
 ```
 
-where S_o is the sensitivity matrix (partial derivatives of model outputs w.r.t. parameters).
+where u are process inputs, g are quality constraints, and P is the probability over θ. High parameter uncertainty → smaller DS at a given reliability → less operating room → regulatory risk.
 
-Standard design criteria (all maximised):
-- **D-optimal**: max det(M) → minimises volume of parameter confidence ellipsoid
-- **A-optimal**: max tr(M) → minimises sum of parameter variances
-- **E-optimal**: max λ_min(M) → minimises longest axis of confidence ellipsoid
+Standard approach (optimization-based): expensive, scales poorly with dimensionality.
 
-### Critical Limitation Discovered (Novel Finding)
+### Chapter 2: Nested Sampling for Probabilistic Design Space Characterization
 
-For **non-linear models**, the FIM is θ-dependent — designs are locally optimal (around current parameter estimates) but not globally robust.
+**Key idea:** Adapt the nested sampling algorithm (originally for Bayesian evidence computation) to directly sample from the probabilistic design space at multiple reliability levels simultaneously.
 
-More importantly, Kennedy discovered a fundamental limitation: **D-optimal MBDOE-PE for non-linear models does NOT guarantee exploration of the input space.** This is because the "explanatory variables" in the linearised sensitivity space are sensitivities, not input variables — the optimal design in sensitivity space may only cover a tiny fraction of the actual input space, leaving the model unvalidated over most of its intended operating range.
+**Algorithm:** Instead of sampling from a likelihood-weighted posterior, samples are sorted by their feasibility probability. The algorithm iteratively replaces the least feasible live point with a new sample, naturally building up a map of the probability landscape.
 
-This is distinct from linear models, where D-optimal designs have the **spanning property** — they always cover the full input space by construction.
+**Two sampling approaches compared:**
+- Standard Monte Carlo with Sobol quasi-random sampling (Algorithm 1)
+- Nested sampling (Algorithm 2)
 
-**Demonstrated with:** consecutive first-order reactions A → B → C in a batch reactor, comparing a linear polynomial model (which spans) vs. the non-linear mechanistic model (which does not).
+**Result:** Nested sampling is competitive with optimization-based approaches in computational time while providing sampling-based flexibility (no gradient requirements, works with black-box simulators).
 
-This gap — designing experiments that simultaneously optimise **parameterisation** AND **exploration/validation** — became WP 1-1.
+**Industrial case studies:**
+1. **Michael Addition Reaction** — 2D DS, Nθ = 100 and 1,000 uncertainty scenarios
+2. **Suzuki Coupling Reaction** — 4D DS (temperature T, oxygen fraction yO₂, batch duration τ, catalyst equivalent RPd|SM2). NL = 10,000 live points, Nθ = 1,000 scenarios. Results shown as trellis plot of 2D projections.
 
-### Other Identified Challenges
-1. Suboptimality for non-linear models (θ-dependence of FIM)
-2. Criterion selection — which criterion to use when the goal is process optimisation vs. DS characterisation vs. control?
-3. Inadequate model structures — what to do when the best mechanistic model is provably wrong in some regions?
+**Key figure (Fig 2.5):** Trellis chart of the 4D Suzuki DS — samples coloured by reliability range (red: α ≥ 0.85, yellow: 0.05 ≤ α < 0.85, blue: α < 0.05).
 
----
+### Chapter 3: Improved Nested Sampling for Design Space
 
-## Research Themes and Work Packages
+**Two strategic improvements + one implementation improvement** to the Chapter 2 algorithm:
+- Reduced computational burden
+- Enables larger problems
 
-### Theme 1: Experimentation and Validation of Models
+**Demonstrated on:** Suzuki coupling reaction. Algorithm 3 achieves DS at α* = 0.85 reliability (Fig 3.1).
 
-**WP 1-1: Simultaneous Optimal Parameterisation and Exploration**
+Computational statistics show significant speedup vs Chapter 2.
 
-Research question: *Can we design experiments that simultaneously maximise information for parameter estimation AND ensure sufficient exploration of the input space for model validation?*
+### Chapter 4: Design Centering for Probabilistic Design Space
 
-Approach: **multi-objective optimisation** where parameterisation quality and input space exploration are separate, non-commensurable objectives. Result is a Pareto frontier of efficient experiment designs — letting practitioners choose their preferred trade-off.
+**Problem:** The probabilistic DS is a complex, irregular shape. Process operators need a simple, communicable operating region.
 
-### Theme 2: Goal-oriented Model Development
+**Solution:** Compute the **largest volume hyperrectangle (box)** inscribed within the probabilistic DS at a given reliability level.
 
-**WP 2-1: MBDOE-PE for Design Space Characterisation**
+**Methodology:**
+1. Run NS-DS (Algorithm from Ch 2/3) to generate scattered point samples with feasibility probability estimates
+2. Train a **Multilayer Perceptron (MLP)** surrogate on the probability map
+3. Solve the **design centering optimization** (maximize box volume subject to MLP feasibility constraint)
 
-Existing goal-oriented frameworks (go-MBDOE-PE) focus on process optimisation as the end-goal. DS characterisation is different — it cannot be posed as a process optimisation problem.
-
-Research question: *How do we incorporate DS characterisation as the explicit modelling goal into the experimental design?*
-
-Proposed measures of DS uncertainty: uncertainty in DS volume, DS bounds, or DS centroid.
-
-**WP 2-2: Multi-goal MBDOE-PE**
-
-In practice, models are built for multiple purposes simultaneously (control, optimisation, DS characterisation). Research question: *What is the right framework for MBDOE-PE when there are multiple competing end-goals?*
-
-Proposed approaches: Pareto-optimal multi-objective framework; or weighted combination of goal-specific weighting matrices.
-
-### Theme 3: Interface Between Mechanistic and Black-box Models
-
-**WP 3-1: Hybrid Modelling Development Framework**
-
-Philosophy: accept that even the best mechanistic model may be inadequate (simplified physics, unknown chemistry). Rather than discarding the mechanistic model, keep developing it and characterise its domain of validity.
-
-Proposed approach: **parallel hybrid modelling** — use a Gaussian Process (non-parametric black-box) to model the residuals of the mechanistic model. This is a tractable, interpretable hybrid.
-
-Two model types:
-- **Type I**: fixed mechanistic model, updated GP — domain of validity is fixed
-- **Type II**: both models updated iteratively — more complex experiment design motivation
-
-Framework for experiment design: **Bayesian Optimisation acquisition functions** (exploration term = GP prediction variance) to drive development of the non-parametric component.
+**Case study: Sequential Reaction**
+- NL = 1,000 live points, NR = 500 replacement proposals, Nθ = 1,000 random scenarios
+- Computed largest hyperrectangle at α = 0.55 (Fig 4.1)
+- Modified solution enforces minimum temperature window of 10 K
+- MLP parity plot shows excellent fit (Fig 4.2)
+- Computed box reported in Table 4.2
 
 ---
 
-## Progress at 10 Months (December 2018)
+## Part 2: Optimal Experiment Design
 
-### Software: Python MBDOE-PE Implementation (P0 Tool)
+### Background: Model-Based Design of Experiments (MBDoE)
 
-Built using **Pyomo** and **Pyomo.DAE**, supporting:
-- Simulation
-- Parameter estimation (MLE / least squares)
-- Bootstrap parameter estimation (for non-identifiable systems)
-- MBDOE-PE (D-/A-/E-optimal design)
+The Fisher Information Matrix (FIM) M(θ, φ) approximates the inverse of the parameter covariance matrix Σ_θ:
 
-**Demo case study:** Thermal de-protection reaction in a CSTR:
-- Reaction: A → P + BP (in THF solvent)
-- Kinetics: first-order, Arrhenius rate law
-- Key issue: FIM non-invertible at constant temperature (non-identifiable) → bootstrap method used for parameter confidence regions
-- Result: A-optimal MBDOE-PE design significantly improved parameter precision vs. arbitrary experiment, even under high parameter correlation
+```
+M(θ,φ) = Σ_oo' (1/σ²_oo') · S_o^T · S_o' + M₀
+```
 
-### Novel Finding: Non-linear Validation Gap
+Standard design criteria:
+| Criterion | Optimise | Geometric meaning |
+|-----------|----------|-------------------|
+| D-optimal | max det(M) | Minimise volume of confidence ellipsoid |
+| A-optimal | max tr(M) | Minimise sum of parameter variances |
+| E-optimal | max λ_min(M) | Minimise longest axis of ellipsoid |
 
-See "Critical Limitation Discovered" above. This was Kennedy's first original research contribution — establishing a gap in the existing literature and motivating WP 1-1.
+**Key limitation for nonlinear models:** FIM depends on θ → designs are locally optimal only. Early-stage model development (when parameter estimates are uncertain) is where this hurts most.
+
+### Chapter 5: Continuous-Effort Approach to MBDoE
+
+**Motivation:** Sequential experiment design (run one experiment, update model, repeat) dominates recent literature, but overlooks the concept of **experimental effort** — how many runs to allocate to each experimental condition.
+
+**Continuous-effort framework:**
+- Experimental design φ specified as continuous support points + continuous efforts ω_i (ω_i ≥ 0, Σ ω_i = 1)
+- The FIM becomes: M(θ, Φ) = N_total · Σ_i ω_i · M(θ, φ_i)
+- Optimize both support points and efforts simultaneously
+- Rounding procedure converts continuous efforts to integer run counts
+
+**Case study:** D-optimal continuous design with candidate experiment grid (Fig 5.1 — effort allocated as proportional circle sizes at support points).
+
+### Chapter 6: Risk-Mitigated Experiment Design (Average/CVaR)
+
+**Problem:** With uncertain θ early in model development, the locally D-optimal design (using current best θ estimate) may be highly suboptimal or even uninformative if the true θ differs significantly.
+
+**Solution:** Bi-objective optimisation over parameter uncertainty scenarios:
+- **Average criterion**: E[φ(M(θ,Φ))] — good average performance
+- **CVaR criterion (Conditional Value at Risk)**: expected criterion value in the worst β% of scenarios (robust tail performance)
+
+**CVaR definition (Fig 6.1 and 6.2):**
+```
+CVaR_β = E[φ | φ ≤ VaR_β]
+```
+where VaR_β is the β-quantile. CVaR penalises the worst-case scenarios more than VaR.
+
+**ε-constraint formulation:** Solve a sequence of single-objective problems (fix CVaR target, maximise average) to trace the Pareto frontier.
+
+**Computational framework:**
+- Discretise parameter uncertainty into Nπ Monte Carlo scenarios
+- Continuous-effort design for each scenario
+- CASADI + SUNDIALS IDAS solver for sensitivity analysis (automatic differentiation)
+- Forward Sensitivity Analysis for ODE systems
+- Implemented in Pydex
+
+**Case studies:**
+
+1. **First-Order Response Model** (exponential: y = θ₁ exp(-θ₂t))
+   - Analytical sensitivities
+   - 10 Pareto-efficient designs computed
+   - Worst 25% scenarios: θ₁ ∈ [-10, -7.5) shown in red (Fig 6.4)
+   - CDFs comparing average vs CVaR designs (Fig 6.5)
+   - Table 6.3: 3 efficient designs with rounded efforts for varying Nt
+
+2. **Fed-batch Reactor**
+   - 243 experiment candidates
+   - 5 Pareto-efficient campaigns (Table 6.4, Fig 6.6 and 6.7)
+
+3. **Suzuki Coupling Reaction**
+   - 10 out of 28 model parameters identifiable (quantitative identifiability study)
+   - Unique Pareto-efficient campaign (Table 6.5)
+   - 11 equally-spaced samples per batch
+
+**Run-time details (Table 6.2):** AMD Ryzen 2600x single core for optimisation; Intel Xeon E5-2697 V2 @ 2.7 GHz for sensitivity analysis.
+
+### Chapter 7: Robust Design Under Operational Constraints
+
+**Problem:** Experimental space is often restricted by operational constraints — not all combinations of inputs are achievable simultaneously (e.g., a stirred-tank reactor can't immediately achieve any temperature with any throughput; dynamics and safety constraints limit what's feasible during a real experiment).
+
+**Key contribution:** Tractable computational framework combining:
+1. **Nested sampling (from Part 1)** to characterise the restricted experimental space (at a given reliability)
+2. **Continuous-effort design (from Ch 5)** to find optimal campaigns within that space
+
+**Problem statement:**
+- Restricted experimental space R(α) = {φ | P(operational constraints satisfied) ≥ α}
+- Robust OED: optimise experimental campaign within R(α) subject to model uncertainty
+
+**Two-step methodology (Fig 7.1):**
+1. Characterise R(α) using nested sampling → set of feasible candidate experiments
+2. Solve robust OED (average D-optimal or CVaR D-optimal) using the feasible candidates
+
+**Illustrative example:** Response-surface model (RSM) — restricted to 1.85 ≤ y ≤ 3 at 85% reliability. 3,885 candidates sampled. D-optimal continuous design shown (Fig 7.2).
+
+**Industrial case study: Jacketed Stirred-Tank Reactor (CSTR) for Throughput Increase**
+- Goal: calibrate model to increase reactor throughput
+- Operational constraints: minimum concentration c_B^min, maximum temperature T^max
+- Default start-up followed by 2× throughput increase after 100 minutes
+- Uncertain parameters: (UA, θ₀) ∈ [-4.101, -3.896] × [350, 400]
+- Restricted experimental space at 95% reliability (Fig 7.5 — 3D scatter, marker size = duration τ_d)
+
+Three experimental designs compared (Figs 7.3–7.7, Tables 7.3–7.4):
+1. **Unrestricted locally D-optimal** — ignores feasibility constraints, may be infeasible
+2. **Restricted locally D-optimal** — within R(0.95), uses nominal θ
+3. **Restricted average D-optimal** — within R(0.95), robust over uncertainty scenarios
 
 ---
 
-## Key Software Outputs
+## Software: DEUS and Pydex
 
-| Tool | Description | Language |
-|------|-------------|----------|
-| **Pydex** | Single-objective MBDOE-PE | Python (Pyomo) |
-| **DEUS** | Feasibility analysis via nested sampling | Python |
+### DEUS (Design of Experiments Under Uncertainty via Sampling)
+- **Purpose:** Feasibility analysis, design space characterization
+- **Core algorithm:** Nested sampling adapted for probabilistic DS
+- **Key outputs:** Point samples with feasibility probability estimates; probability maps; design centering
+- **Language:** Python
 
-Both released open-source. Pydex was the primary deliverable developed throughout the PhD (P0 → P1 evolution).
-
----
-
-## Publications (from PhD, 7 total)
-
-(Placeholder — to be filled when publication list is shared)
-
----
-
-## Connections to Other Work
-
-- **MSc Thesis (Syngenta):** Used AIMMS for MILP optimisation — different domain, but same PSE foundations
-- **Eli Lilly Internship (2020):** Applied MBDOE-PE knowledge to the Mounjaro synthesis reactor — direct application of PhD methods in industrial setting
-- **Imperial Research Associate (2022–2023):** Extended to multi-objective OED (PharmaSEL-Prosperity Partnership with Eli Lilly)
-- **Sheffield Research Associate (2022–2023):** Applied process modelling + OED to mRNA vaccine manufacturing
+### Pydex (Python Design of Experiments)
+- **Purpose:** Optimal experiment design for parameter estimation (MBDoE-PE)
+- **Capabilities:**
+  - D/A/E-optimal design (standard FIM-based)
+  - Continuous-effort formulation
+  - Bi-objective Average/CVaR robust design
+  - Integration with CASADI for sensitivity analysis
+  - Supports DAE/ODE systems via Pyomo.DAE + SUNDIALS IDAS
+  - Bootstrap parameter estimation
+  - Parameter identifiability analysis
+- **Language:** Python (Pyomo, CASADI, SUNDIALS)
 
 ---
 
-## Source Files
+## Chapter Structure Summary
 
-- `D:\OneDrive\Imperial OneDrive Copy\OneDrive - Imperial College London\PhD\ESA\December\ESA Report.docx` — PhD Confirmation Report (Dec 2018), ~10 months in
-- `D:\OneDrive\Imperial OneDrive Copy\OneDrive - Imperial College London\PhD\ESA\October\ESA Report.docx` — Earlier ESA report (Oct 2018)
-- PhD thesis: pending extraction
+| Chapter | Title | Part | Key contribution |
+|---------|-------|------|-----------------|
+| 1 | Introduction + Literature Review | — | Overview, motivation, research aims |
+| 2 | Bayesian Approach to Probabilistic DS: Nested Sampling | I | NS-DS algorithm; Michael addition + Suzuki case studies |
+| 3 | Nested Sampling Tailored to Bayesian DS | I | 3 improvements to Ch 2; computational speedup |
+| 4 | Design Centering for Probabilistic DS | I | MLP surrogate + largest inscribed box |
+| 5 | Continuous Optimal Experimental Designs | II | Continuous-effort MBDoE framework |
+| 6 | Continuous-Effort Design with Risk Mitigation | II | Bi-objective Average/CVaR Pareto framework |
+| 7 | Robust Campaigns Under Operational Constraints | II | NS (Part 1) + continuous-effort (Ch 5) integrated |
+| 8 | Concluding Remarks | III | Future work: identifiability, goal-oriented DS OED |
+
+---
+
+## Future Work (Chapter 8)
+
+Two directions identified:
+1. **Minimal subset of measurable responses for model identifiability** — systematic approach to selecting which outputs to measure
+2. **Goal-oriented experiment design tailored to design space characterization:**
+   - Direct method
+   - Tailored V-optimal criterion
+
+---
+
+## Key Industrial Case Studies
+
+| Reaction / System | Chapters | DS Dimensions | Key insight |
+|-------------------|----------|---------------|-------------|
+| Michael Addition Reaction | 2 | 2D | DS computed with 100 and 1,000 θ scenarios |
+| Suzuki Coupling Reaction | 2, 3, 6 | 4D (T, yO₂, τ, RPd/SM2) | Large trellis chart DS; unique Pareto OED campaign with 10/28 identifiable params |
+| Sequential Reaction | 4 | 2D | Largest inscribed box via design centering |
+| Fed-batch Reactor | 6 | — | 5 Pareto-efficient campaigns; 243 candidates |
+| Jacketed CSTR | 7 | 3D (τ_d, startup config) | Throughput increase; 95% reliability constraint |
+| First-order Response Model | 6 | — | Analytical reference case; 10 Pareto designs |
+
+---
+
+## Thesis Quotes (epigraph)
+
+> "Everything must be taken into account. If the fact will not fit the theory — let the theory go."
+> — Agatha Christie, *The Mysterious Affair at Styles*
+
+> "It is the simple suggestion that the only valid reason for rejecting a statistical hypothesis is that some alternative explains the observed events with a greater degree of probability."
+> — Herbert I. Weisberg, *Willful Ignorance: The Mismeasure of Uncertainty*
+
+---
+
+## Source File
+
+`D:\OneDrive\Imperial OneDrive Copy\OneDrive - Imperial College London\PhD\Kusumo-K-2022-PhD-Thesis.pdf`
+244 pages, ~38.8 MB
