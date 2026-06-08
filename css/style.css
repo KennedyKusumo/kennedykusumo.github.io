@@ -326,3 +326,17 @@ footer .container {
 .text-muted { color: var(--color-muted); }
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }
+
+.col1,.col2,.col3{
+	float:left;
+	width:30%;
+}
+/* #col1{
+	background-color:red;
+	}
+#col2{
+	background-color:green;
+	}
+#col3{
+	background-color:blue;
+	} */

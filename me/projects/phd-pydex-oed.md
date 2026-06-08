@@ -16,6 +16,22 @@
 **Sponsoring body:** PharmaSEL-Prosperity Partnership (PI: Prof. Claire Adjiman)
 **Funding:** EPSRC
 
+**Confirmed read:** 2026-04-25 (PDF, 244 pp, 38.8 MB)
+
+---
+
+## Foreword (Kennedy's own words — key for article voice)
+
+> The capacity to learn, communicate, and innovate are perhaps the defining qualities of humankind. Humans are born with an instinct to interact and play with the environment. As we interact, we would recognize patterns from the information that our senses gathers. This recognition is what we call learning, impossible without play.
+>
+> We are lucky to be born at a time when written communication is commonplace. Without it, we are constrained to learn only from our own experiences. Writing permits encoding of knowledge, redefining the scope of knowledge transfer across time and space. As I have benefited from writings of the great scientists of the past, I earnestly hope that I can give back. I hope that some contributions I have been able to make, however small, in the fleeting moments of my life can be communicated across and is of some use to you, dear reader.
+>
+> The futility of life means that we are alive to do one thing and one thing only: play!
+
+**Dedication:** to father Kasimo Sulaiman, mother Ir. Kusmiti Tjandra, and brother Abraham Putra Kusumo — *"for faithfully believing in me and shouldering what should have been my responsibilities in order for me to pursue my academic dream."*
+
+**Acknowledgement of partner:** Ananda Tika Sudarmaji — *"companionship and unending patience towards my frustrations throughout my journey in completing this thesis."*
+
 ---
 
 ## Thesis Abstract
@@ -53,6 +69,13 @@ Kennedy's work sits within PSE — a subfield of chemical engineering using math
 The research directly addresses:
 - **How to characterise the design space** robustly under model parameter uncertainty
 - **How to design experiments** that most efficiently calibrate models, especially early in development when parameter estimates are poor
+
+### The four specific research aims (from Ch 1)
+
+1. Improve computational efficiency of sampling-based methodologies for design space characterization and provide effective methods to exploit them
+2. Develop novel optimal experimental design techniques concentrating on optimal calibration of nonlinear models in early stages of their development
+3. Demonstrate the novel methodologies to industrially relevant case studies
+4. Implement open-source software to further promote usage of the developed methodologies
 
 ---
 
